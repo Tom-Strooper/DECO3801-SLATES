@@ -15,7 +15,6 @@ public class Player : NetworkBehaviour
     {
         if (GetInput(out NetworkInputData data))
         {
-            Debug.Log(data.Direction);
             data.Direction.Normalize();
             _controller.Move(5.0f * data.Direction * Runner.DeltaTime);
         }
