@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -10,15 +11,17 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     private NetworkRunner _runner;
 
+    [SerializeField] private Camera _camera;
     [SerializeField] private NetworkPrefabRef _playerPrefab;
 
-    InputAction moveAction, hostGameAction, joinGameAction;
+    InputAction moveAction, lookAction, hostGameAction, joinGameAction;
 
     private Dictionary<PlayerRef, NetworkObject> _players = new Dictionary<PlayerRef, NetworkObject>();
 
     private void Awake()
     {
         moveAction = InputSystem.actions.FindAction("Move");
+        lookAction = InputSystem.actions.FindAction("Look");
         hostGameAction = InputSystem.actions.FindAction("Host");
         joinGameAction = InputSystem.actions.FindAction("Join");
     }
@@ -33,8 +36,6 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     private async void StartGame(GameMode mode)
     {
-        Debug.Log(mode);
-
         // Create a Fusion NetworkRunner
         _runner = gameObject.AddComponent<NetworkRunner>();
 
@@ -56,6 +57,8 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             Scene = scene, // This only matters if the game is started by a host - clients must use host's scene
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
         });
+
+        Destroy(_camera.gameObject);
     }
 
     private void OnGUI()
@@ -86,6 +89,9 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             // Despawn the player
             runner.Despawn(_players[player]);
             _players.Remove(player);
+            // Free the mouse
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
     }
 
@@ -93,8 +99,8 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         NetworkInputData data = new NetworkInputData();
 
-        Vector2 moveInput = moveAction.ReadValue<Vector2>();
-        data.Direction = new Vector3(moveInput.y, 0.0f, moveInput.x);
+        data.direction = moveAction.ReadValue<Vector2>();
+        data.look = lookAction.ReadValue<Vector2>();
 
         input.Set(data);
     }
