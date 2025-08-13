@@ -9,6 +9,7 @@ public class Player : NetworkBehaviour
     private void Awake()
     {
         _controller = GetComponent<NetworkCharacterController>();
+        Debug.Log(_controller);
     }
 
     public override void FixedUpdateNetwork()

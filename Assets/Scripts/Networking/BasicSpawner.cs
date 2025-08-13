@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
@@ -11,10 +12,29 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     [SerializeField] private NetworkPrefabRef _playerPrefab;
 
+    InputAction moveAction, hostGameAction, joinGameAction;
+
     private Dictionary<PlayerRef, NetworkObject> _players = new Dictionary<PlayerRef, NetworkObject>();
+
+    private void Awake()
+    {
+        moveAction = InputSystem.actions.FindAction("Move");
+        hostGameAction = InputSystem.actions.FindAction("Host");
+        joinGameAction = InputSystem.actions.FindAction("Join");
+    }
+
+    private void Update()
+    {
+        if (_runner is not null) return;
+
+        if (hostGameAction.IsPressed()) StartGame(GameMode.Host);
+        if (joinGameAction.IsPressed()) StartGame(GameMode.Client);
+    }
 
     private async void StartGame(GameMode mode)
     {
+        Debug.Log(mode);
+
         // Create a Fusion NetworkRunner
         _runner = gameObject.AddComponent<NetworkRunner>();
 
@@ -44,7 +64,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         if (_runner is null)
         {
             if (GUI.Button(new Rect(0, 0, 200, 40), "Host")) StartGame(GameMode.Host);
-            else if (GUI.Button(new Rect(0, 40, 200, 40), "Join")) StartGame(GameMode.Client);
+            if (GUI.Button(new Rect(0, 40, 200, 40), "Join")) StartGame(GameMode.Client);
         }
     }
 
@@ -73,10 +93,8 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         NetworkInputData data = new NetworkInputData();
 
-        if (Input.GetKey(KeyCode.W)) data.Direction += Vector3.forward;
-        if (Input.GetKey(KeyCode.A)) data.Direction += Vector3.left;
-        if (Input.GetKey(KeyCode.S)) data.Direction += Vector3.back;
-        if (Input.GetKey(KeyCode.D)) data.Direction += Vector3.right;
+        Vector2 moveInput = moveAction.ReadValue<Vector2>();
+        data.Direction = new Vector3(moveInput.y, 0.0f, moveInput.x);
 
         input.Set(data);
     }
