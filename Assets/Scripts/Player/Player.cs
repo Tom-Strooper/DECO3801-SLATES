@@ -9,13 +9,13 @@ public class Player : NetworkBehaviour
     private void Awake()
     {
         _controller = GetComponent<NetworkCharacterController>();
-        Debug.Log(_controller);
     }
 
     public override void FixedUpdateNetwork()
     {
         if (GetInput(out NetworkInputData data))
         {
+            Debug.Log(data.Direction);
             data.Direction.Normalize();
             _controller.Move(5.0f * data.Direction * Runner.DeltaTime);
         }
