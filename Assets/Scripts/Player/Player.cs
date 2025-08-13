@@ -32,13 +32,18 @@ public class Player : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
+        // TODO - Improve character controller
         if (GetInput(out NetworkInputData data))
         {
             // Normalise direction to prevent wild movement input
             data.direction.Normalize();
 
             _verticalVelocity -= _gravity * Runner.DeltaTime;
-            if (_controller.IsGrounded) _verticalVelocity = -1.0f;
+            if (_controller.IsGrounded)
+            {
+                if (data.buttons.IsSet((int)InputButtons.Jump)) _verticalVelocity = 10.0f;
+                else _verticalVelocity = -1.0f;
+            }
 
             Vector3 targetVelocity = (_controller.Transform.forward * data.direction.y + _controller.Transform.right * data.direction.x) * _maxMovementSpeed;
             Vector3 velocity = _controller.RealVelocity + (targetVelocity - _controller.RealVelocity) * _accelerationCoefficient * Runner.DeltaTime;
@@ -46,6 +51,8 @@ public class Player : NetworkBehaviour
             velocity.y = _verticalVelocity;
 
             _controller.Move(velocity);
+
+            // TODO - Fix camera jitter
             _controller.AddLookRotation(0.0f, data.look.x * _sensitivity * Runner.DeltaTime);
 
             _xRotation -= data.look.y * _sensitivity * Runner.DeltaTime;

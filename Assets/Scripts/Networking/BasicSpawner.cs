@@ -14,7 +14,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] private Camera _camera;
     [SerializeField] private NetworkPrefabRef _playerPrefab;
 
-    InputAction moveAction, lookAction, hostGameAction, joinGameAction;
+    InputAction moveAction, lookAction, jumpAction, hostGameAction, joinGameAction;
 
     private Dictionary<PlayerRef, NetworkObject> _players = new Dictionary<PlayerRef, NetworkObject>();
 
@@ -22,6 +22,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         moveAction = InputSystem.actions.FindAction("Move");
         lookAction = InputSystem.actions.FindAction("Look");
+        jumpAction = InputSystem.actions.FindAction("Jump");
         hostGameAction = InputSystem.actions.FindAction("Host");
         joinGameAction = InputSystem.actions.FindAction("Join");
     }
@@ -101,6 +102,8 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
         data.direction = moveAction.ReadValue<Vector2>();
         data.look = lookAction.ReadValue<Vector2>();
+
+        data.buttons.Set((int)InputButtons.Jump, jumpAction.IsPressed());
 
         input.Set(data);
     }
