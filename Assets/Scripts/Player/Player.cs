@@ -8,7 +8,7 @@ public class Player : NetworkBehaviour
     private SimpleKCC _controller;
 
     [Header("Camera Settings")]
-    [SerializeField] private Camera _camera;
+    [SerializeField] private Transform _head;
     [SerializeField] private float _sensitivity = 50.0f;
 
     private float _xRotation = 0.0f;
@@ -23,11 +23,25 @@ public class Player : NetworkBehaviour
     private void Awake()
     {
         _controller = GetComponent<SimpleKCC>();
+    }
+
+    public override void Spawned()
+    {
+        if (!HasInputAuthority) return;
 
         // TODO - Gotta move this
         // Fix the mouse in the centre of the screen and hide it
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        // Indicate to the camera that this player should be followed
+        CameraController.Instance.BindToHead(_head);
+    }
+
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        // Unbind the camera singleton
+        CameraController.Instance.UnbindFromHead(_head);
     }
 
     public override void FixedUpdateNetwork()
@@ -58,7 +72,17 @@ public class Player : NetworkBehaviour
             _xRotation -= data.look.y * _sensitivity * Runner.DeltaTime;
             _xRotation = Mathf.Clamp(_xRotation, -80.0f, 85.0f);
 
-            _camera.transform.localRotation = Quaternion.Euler(_xRotation, 0.0f, 0.0f);
+            UpdateCameraRotation();
         }
+    }
+
+    public override void Render()
+    {
+        UpdateCameraRotation();
+    }
+
+    private void UpdateCameraRotation()
+    {
+        _head.transform.localRotation = Quaternion.Euler(_xRotation, 0.0f, 0.0f);
     }
 }

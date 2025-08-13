@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -11,7 +10,6 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     private NetworkRunner _runner;
 
-    [SerializeField] private Camera _camera;
     [SerializeField] private NetworkPrefabRef _playerPrefab;
 
     InputAction moveAction, lookAction, jumpAction, hostGameAction, joinGameAction;
@@ -58,8 +56,6 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             Scene = scene, // This only matters if the game is started by a host - clients must use host's scene
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
         });
-
-        Destroy(_camera.gameObject);
     }
 
     private void OnGUI()
