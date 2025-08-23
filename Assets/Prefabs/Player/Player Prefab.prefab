@@ -251,7 +251,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _head: {fileID: 5662189436137752359}
-  _sensitivity: 50
+  _sensitivity: 30
   _gravity: 20
   _maxMovementSpeed: 10
   _accelerationCoefficient: 10
