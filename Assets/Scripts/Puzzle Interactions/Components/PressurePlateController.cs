@@ -14,6 +14,7 @@ namespace Slates.PuzzleInteractions.Components
         [SerializeField] private TriggerVolume _activationVolume;
 
         private bool _active;
+        private bool _enabled = true;
 
         [Header("Visuals")]
         [SerializeField] private MeshRenderer _renderer;
@@ -39,15 +40,20 @@ namespace Slates.PuzzleInteractions.Components
         }
 
         public void Reset() => Deactivate();
+        public void Disable() => _enabled = false;
 
         private void Activate()
         {
+            if (!_enabled) return;
+
             _active = true;
             Owner.Activate(Key);
         }
 
         private void Deactivate()
         {
+            if (!_enabled) return;
+
             _active = false;
             Owner.Deactivate(Key);
         }

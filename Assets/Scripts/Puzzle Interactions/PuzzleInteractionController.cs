@@ -141,6 +141,13 @@ namespace Slates.PuzzleInteractions
             {
                 _guess.Clear();
             }
+            if ((behaviour & PuzzleControllerBehaviour.DeactivateInteractors) != 0)
+            {
+                foreach (IPuzzleInteractor interactor in _interactors.Values)
+                {
+                    interactor.Disable();
+                }
+            }
         }
     }
 
@@ -149,6 +156,7 @@ namespace Slates.PuzzleInteractions
     {
         ResetInteractors = 1 << 0,
         ResetGuess = 1 << 1,
+        DeactivateInteractors = 1 << 2,
     }
 
     public delegate void InteractionHandler();

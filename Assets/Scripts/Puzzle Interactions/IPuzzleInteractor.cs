@@ -6,6 +6,7 @@ namespace Slates.PuzzleInteractions
     {
         public string Key { get; }
         public void Reset();
+        public void Disable();
     }
 
     public enum InteractorActivationMode

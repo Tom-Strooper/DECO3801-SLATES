@@ -1671,8 +1671,8 @@ MonoBehaviour:
   - H
   _ordered: 1
   _maxLength: 5
-  _failureBehaviour: -1
-  _successBehaviour: -1
+  _failureBehaviour: 3
+  _successBehaviour: 6
   _submitObj: {fileID: 0}
   _successObj: {fileID: 1000563646}
 --- !u!4 &1539380212
