@@ -1,8 +1,8 @@
 using Fusion;
-using Fusion.Addons.SimpleKCC;
+using Slates.PuzzleInteractions.Physics;
 using UnityEngine;
 
-namespace Slates.PuzzleInteractions.Components
+namespace Slates.PuzzleInteractions
 {
     [RequireComponent(typeof(Collider))]
     public class TriggerVolume : NetworkBehaviour
@@ -17,12 +17,12 @@ namespace Slates.PuzzleInteractions.Components
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.attachedRigidbody?.GetComponent<Player>() is null) return;
+            if (other.attachedRigidbody?.GetComponent<PhysicsInteractorComponent>() is null) return;
             Entered(other);
         }
         private void OnTriggerExit(Collider other)
         {
-            if (other.attachedRigidbody?.GetComponent<Player>() is null) return;
+            if (other.attachedRigidbody?.GetComponent<PhysicsInteractorComponent>() is null) return;
             Exited(other);
         }
     }

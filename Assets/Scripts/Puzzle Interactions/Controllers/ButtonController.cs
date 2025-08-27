@@ -1,7 +1,7 @@
 using Fusion;
 using UnityEngine;
 
-namespace Slates.PuzzleInteractions.Components
+namespace Slates.PuzzleInteractions.Controllers
 {
     public class ButtonController : NetworkBehaviour
     {

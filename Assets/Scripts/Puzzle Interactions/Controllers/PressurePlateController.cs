@@ -1,7 +1,7 @@
 using Fusion;
 using UnityEngine;
 
-namespace Slates.PuzzleInteractions.Components
+namespace Slates.PuzzleInteractions.Controllers
 {
     public class PressurePlateController : NetworkBehaviour, IPuzzleInteractor
     {
@@ -49,7 +49,6 @@ namespace Slates.PuzzleInteractions.Components
             _active = true;
             Owner.Activate(Key);
         }
-
         private void Deactivate()
         {
             if (!_enabled) return;
