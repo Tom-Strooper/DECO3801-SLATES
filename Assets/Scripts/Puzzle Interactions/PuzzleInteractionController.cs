@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Fusion;
+using Slates.Utility;
 using UnityEngine;
 
 namespace Slates.PuzzleInteractions
@@ -7,7 +8,7 @@ namespace Slates.PuzzleInteractions
     public class PuzzleInteractionController : NetworkBehaviour
     {
         private Dictionary<string, IPuzzleInteractor> _interactors = new Dictionary<string, IPuzzleInteractor>();
-        private List<string> _guess = new List<string>();
+        [Networked, Capacity(Constants.MaxPuzzleElements)] private NetworkLinkedList<string> _guess { get; } = new NetworkLinkedList<string>();
 
         [Header("Puzzle Settings")]
         [SerializeField, Tooltip("The password to unlock/complete the puzzle")]
@@ -30,7 +31,7 @@ namespace Slates.PuzzleInteractions
         private IInteractionSender _submit;
         private IInteractionReceiver _success;
 
-        private void Awake()
+        public override void Spawned()
         {
             foreach (IPuzzleInteractor interactor in GetComponentsInChildren<IPuzzleInteractor>())
             {
@@ -78,7 +79,6 @@ namespace Slates.PuzzleInteractions
                 else if (_maxLength == 0 && _guess.Count == _password.Count) Submit();
             }
         }
-
         public void Deactivate(string key)
         {
             _guess.Remove(key);

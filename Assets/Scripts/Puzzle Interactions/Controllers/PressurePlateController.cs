@@ -13,15 +13,15 @@ namespace Slates.PuzzleInteractions.Controllers
         [SerializeField] private InteractorActivationMode _mode;
         [SerializeField] private TriggerVolume _activationVolume;
 
-        private bool _active;
-        private bool _enabled = true;
+        [Networked] private bool _active { get; set; }
+        [Networked] private bool _enabled { get; set; } = true;
 
         [Header("Visuals")]
         [SerializeField] private MeshRenderer _renderer;
         [SerializeField] private Material _inactiveMaterial;
         [SerializeField] private Material _activeMaterial;
 
-        private void Update()
+        public override void FixedUpdateNetwork()
         {
             _renderer.material = _active ? _activeMaterial : _inactiveMaterial;
         }
