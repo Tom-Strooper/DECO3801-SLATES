@@ -33,7 +33,7 @@ namespace Slates.Player
         [SerializeField] private Transform _heldObjectPoint;
         [SerializeField] private LayerMask _interactionLayerMask;
 
-        private Rigidbody _held = null;
+        private ISelectable _held = null;
 
         private void Awake()
         {
@@ -93,8 +93,8 @@ namespace Slates.Player
                 if (_held is not null)
                 {
                     // Match the speed of the player
-                    _held.MovePosition(_heldObjectPoint.position);
-                    _held.MoveRotation(_heldObjectPoint.rotation);
+                    _held.RB.MovePosition(_heldObjectPoint.position);
+                    _held.RB.MoveRotation(_heldObjectPoint.rotation);
                 }
 
                 // Handle select/deselect
@@ -120,7 +120,7 @@ namespace Slates.Player
             // If we are holding something, drop it
             if (_held is not null)
             {
-                Drop();
+                _held.OnDeselected(this);
                 return;
             }
 
@@ -133,28 +133,26 @@ namespace Slates.Player
                                  _interactionLayerMask.value)) return;
 
             if (hit.collider.attachedRigidbody?.GetComponent<ISelectable>() is not ISelectable selectable) return;
+            if (selectable.IsSelected) return;
+
             selectable.OnSelected(this);
         }
 
-        public void Grab(Rigidbody body)
+        public void Grab(ISelectable body)
         {
-            if (_held is not null) Drop();
-
-            Debug.Log($"Grabbing {body}");
+            if (_held is not null) _held.OnDeselected(this);
 
             _held = body;
 
-            _held.useGravity = false;
-            _held.isKinematic = true;
+            _held.RB.useGravity = false;
+            _held.RB.isKinematic = true;
         }
-        private void Drop()
+        public void Drop(ISelectable body)
         {
-            Debug.Log($"Dropping {_held}");
+            if (_held is null || _held != body) return;
 
-            if (_held is null) return;
-
-            _held.useGravity = true;
-            _held.isKinematic = false;
+            _held.RB.useGravity = true;
+            _held.RB.isKinematic = false;
 
             _held = null;
         }
