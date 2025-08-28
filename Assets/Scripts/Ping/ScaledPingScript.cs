@@ -3,43 +3,41 @@ using UnityEngine;
 public class ScaledPingScript : MonoBehaviour
 {
     [Header("Scaling Settings")]
-    public float PingScaleFactor = 1f;     // base scale multiplier
-    public float PingMinDist = 1f;         // distance below which scale is clamped
-    public float PingMaxScale = 10f;       // maximum scale to prevent huge objects
-    public float PingMinScale = 0.5f;      // minimum scale to prevent disappearing
+    public float PingScaleFactor = 1f;
+    public float PingMinDist = 1f;
+    public float PingMaxScale = 10f;
+    public float PingMinScale = 0.5f;
 
     [Header("Target & Display")]
-    public Transform Tgt;                   // player or camera to face
-    public TextMesh PingDistText;           // optional text to show distance
+    public Transform Tgt;                   // Player to follow
+    public TextMesh PingDistText;
 
     [Header("Visual Offset")]
-    public Vector3 LocalOffset = new Vector3(0, 1f, 0); // lifts ping above parent pivot
-
-    private float dist;
+    public Vector3 LocalOffset = Vector3.zero;
 
     void Update()
     {
-        if (Tgt == null) return;
+        if (Tgt == null) return; // Don't move if no target
 
-        // Move ping slightly above parent pivot
-        transform.localPosition = LocalOffset;
+        // Follow player
+        transform.position = Tgt.position + LocalOffset;
 
-        // Distance to player
-        dist = Vector3.Distance(transform.position, Tgt.position);
+        // Distance for scaling and text
+        float dist = Vector3.Distance(transform.position, Tgt.position);
 
-        // Update distance text if assigned
         if (PingDistText != null)
             PingDistText.text = Mathf.Round(dist).ToString() + " M";
 
-        // Scale ping based on distance, safely clamped
+        // Scale with distance
         float scale = (dist / Mathf.Max(PingMinDist, 0.01f)) * PingScaleFactor;
         scale = Mathf.Clamp(scale, PingMinScale, PingMaxScale);
         transform.localScale = Vector3.one * scale;
 
-        // Rotate to always face player
-        transform.LookAt(Tgt);
-
-        // Flip if mesh is backwards (single-sided plane)
-        transform.Rotate(0, 180f, 0); 
+        // Face camera
+        if (Camera.main != null)
+        {
+            transform.LookAt(Camera.main.transform);
+            transform.Rotate(0, 180f, 0); // correct for single-sided mesh
+        }
     }
 }
