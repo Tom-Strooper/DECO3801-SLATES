@@ -52,7 +52,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         await _runner.StartGame(new StartGameArgs()
         {
             GameMode = mode,
-            SessionName = "TestRoom",
+            SessionName = "ElleTestRoom",
             Scene = scene, // This only matters if the game is started by a host - clients must use host's scene
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
         });

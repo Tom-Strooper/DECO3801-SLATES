@@ -23,6 +23,7 @@ public class PlayerKCC : NetworkBehaviour
     private void Awake()
     {
         KCC = GetComponent<KCC>();
+        QualitySettings.vSyncCount = 2;
     }
 
     public override void Spawned()
