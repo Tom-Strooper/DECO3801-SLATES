@@ -7,19 +7,17 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: PlaceholderActive
-  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_Name: M_Fog
+  m_Shader: {fileID: -6465566751694194690, guid: a34462d0dcef69448ad55d19e76cf08e, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - _EMISSION
+  m_ValidKeywords: []
   m_InvalidKeywords: []
-  m_LightmapFlags: 2
+  m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap:
-    RenderType: Opaque
+  stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
   m_LockedProperties: 
@@ -84,6 +82,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - Vector1_3079162E: 10
+    - Vector1_49C84A1C: 1
+    - Vector1_6E7FA0AB: 10
+    - Vector1_6F7F40FD: 0.01
+    - Vector1_72E37BDA: 2
+    - Vector1_7C7BA310: 1
+    - Vector1_A5CA641B: 0.04
+    - Vector1_D59E333A: 0
+    - Vector1_E7067C2C: 2
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
@@ -105,6 +112,7 @@ Material:
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
+    - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Smoothness: 0.5
@@ -117,13 +125,17 @@ Material:
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0, g: 0.54154336, b: 0.9528302, a: 1}
-    - _Color: {r: 0, g: 0.5415433, b: 0.95283014, a: 1}
-    - _EmissionColor: {r: 0.96333224, g: 2.4680135, b: 6.188679, a: 1}
+    - Color_2F812B48: {r: 0.78, g: 0.78, b: 0.78, a: 0}
+    - Color_7A0CA90F: {r: 0.46226418, g: 0.46226418, b: 0.46226418, a: 0}
+    - Vector4_6875CAB3: {r: 1, g: 0, b: 0, a: 90}
+    - Vector4_D923B27C: {r: 0, g: 1, b: -1, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &4950931165340752746
+--- !u!114 &1805032528912272229
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -134,5 +146,5 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
   version: 10
