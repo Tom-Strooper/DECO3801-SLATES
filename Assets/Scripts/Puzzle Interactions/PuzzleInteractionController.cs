@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Fusion;
-using Slates.Utility;
 using UnityEngine;
 
 namespace Slates.PuzzleInteractions
@@ -8,7 +7,7 @@ namespace Slates.PuzzleInteractions
     public class PuzzleInteractionController : NetworkBehaviour
     {
         private Dictionary<string, IPuzzleInteractor> _interactors = new Dictionary<string, IPuzzleInteractor>();
-        [Networked, Capacity(Constants.MaxPuzzleElements)] private NetworkLinkedList<string> _guess { get; } = new NetworkLinkedList<string>();
+        private List<string> _guess { get; } = new List<string>();
 
         [Header("Puzzle Settings")]
         [SerializeField, Tooltip("The password to unlock/complete the puzzle")]
@@ -67,6 +66,8 @@ namespace Slates.PuzzleInteractions
 
         public void Activate(string key)
         {
+            if (!Runner.IsServer) return;
+
             if (_maxLength > 0 && _guess.Count == _maxLength) return;
             if (_ordered && _guess.Contains(key)) return;
 
@@ -81,6 +82,8 @@ namespace Slates.PuzzleInteractions
         }
         public void Deactivate(string key)
         {
+            if (!Runner.IsServer) return;
+
             _guess.Remove(key);
         }
 
@@ -134,7 +137,7 @@ namespace Slates.PuzzleInteractions
             {
                 foreach (IPuzzleInteractor interactor in _interactors.Values)
                 {
-                    interactor.Reset();
+                    interactor.RPC_Reset();
                 }
             }
             if ((behaviour & PuzzleControllerBehaviour.ResetGuess) != 0)
@@ -145,7 +148,7 @@ namespace Slates.PuzzleInteractions
             {
                 foreach (IPuzzleInteractor interactor in _interactors.Values)
                 {
-                    interactor.Disable();
+                    interactor.RPC_Disable();
                 }
             }
         }

@@ -8,7 +8,7 @@ namespace Slates.PuzzleInteractions.Selection
         public bool IsSelected { get; }
         public Rigidbody RB { get; }
 
-        public void OnSelected(PlayerController player);
-        public void OnDeselected(PlayerController player);
+        public void RPC_OnSelected(PlayerController player);
+        public void RPC_OnDeselected(PlayerController player);
     }
 }

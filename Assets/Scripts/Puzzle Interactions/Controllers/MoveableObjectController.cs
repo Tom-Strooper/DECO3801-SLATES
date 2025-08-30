@@ -9,7 +9,7 @@ namespace Slates.PuzzleInteractions.Controllers
     [RequireComponent(typeof(Rigidbody))]
     public class MoveableObjectController : PhysicsInteractorComponent, ISelectable
     {
-        [Networked] public bool IsSelected { get; private set; } = false;
+        [Networked] public bool IsSelected { get; private set; }
 
         public Rigidbody RB => _rb;
         private Rigidbody _rb;
@@ -19,15 +19,26 @@ namespace Slates.PuzzleInteractions.Controllers
             _rb = GetComponent<Rigidbody>();
         }
 
-        public void OnSelected(PlayerController player)
-        {
-            IsSelected = true;
-            player.Grab(this);
-        }
-        public void OnDeselected(PlayerController player)
+        public override void Spawned()
         {
             IsSelected = false;
-            player.Drop(this);
+        }
+
+        [Rpc(RpcSources.StateAuthority, RpcTargets.StateAuthority | RpcTargets.InputAuthority)]
+        public void RPC_OnSelected(PlayerController player)
+        {
+            if (!Runner.IsServer) return;
+
+            IsSelected = true;
+            player.RPC_Grab(this);
+        }
+        [Rpc(RpcSources.StateAuthority, RpcTargets.StateAuthority | RpcTargets.InputAuthority)]
+        public void RPC_OnDeselected(PlayerController player)
+        {
+            if (!Runner.IsServer) return;
+
+            IsSelected = false;
+            player.RPC_Drop(this);
         }
     }
 }

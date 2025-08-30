@@ -2,6 +2,7 @@ using Fusion;
 using Fusion.Addons.SimpleKCC;
 using Slates.Camera;
 using Slates.Networking.Input;
+using Slates.PuzzleInteractions.Controllers;
 using Slates.PuzzleInteractions.Selection;
 using UnityEngine;
 
@@ -61,7 +62,6 @@ namespace Slates.Player
 
         public override void FixedUpdateNetwork()
         {
-            // TODO - Improve character controller
             if (GetInput(out NetworkInputData data))
             {
                 // Normalise direction to prevent wild movement input
@@ -103,6 +103,11 @@ namespace Slates.Player
                 // Update values
                 PreviousButtons = data.buttons;
             }
+
+            if (transform.position.y < -100.0f)
+            {
+                _controller.SetPosition(Vector3.up);
+            }
         }
 
         public override void Render()
@@ -117,14 +122,14 @@ namespace Slates.Player
 
         private void Select()
         {
+            if (!HasInputAuthority) return;
+
             // If we are holding something, drop it
             if (_held is not null)
             {
-                _held.OnDeselected(this);
+                RPC_RequestDeselect((NetworkBehaviour)_held, this);
                 return;
             }
-
-            Debug.DrawRay(_head.position, _head.forward * _maxSelectionDistance, Color.red, 1.0f);
 
             // Perform a raycast, ignoring the player's rigidbody, to see if the player is selecting anything in range
             RaycastHit hit;
@@ -137,21 +142,36 @@ namespace Slates.Player
             if (hit.collider.attachedRigidbody?.GetComponent<ISelectable>() is not ISelectable selectable) return;
             if (selectable.IsSelected) return;
 
-            selectable.OnSelected(this);
+            RPC_RequestSelect((NetworkBehaviour)selectable, this);
         }
 
-        public void Grab(ISelectable body)
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        private void RPC_RequestSelect(NetworkBehaviour selectable, PlayerController selector)
         {
-            if (_held is not null) _held.OnDeselected(this);
+            if (selectable is not ISelectable s) return;
+            s.RPC_OnSelected(selector);
+        }
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        private void RPC_RequestDeselect(NetworkBehaviour selectable, PlayerController selector)
+        {
+            if (selectable is not ISelectable s) return;
+            s.RPC_OnDeselected(selector);
+        }
+
+        [Rpc(RpcSources.StateAuthority, RpcTargets.StateAuthority | RpcTargets.InputAuthority)]
+        public void RPC_Grab(MoveableObjectController body)
+        {
+            if (_held is not null) RPC_RequestDeselect((NetworkBehaviour)_held, this);
 
             _held = body;
 
             _held.RB.useGravity = false;
             _held.RB.isKinematic = true;
         }
-        public void Drop(ISelectable body)
+        [Rpc(RpcSources.StateAuthority, RpcTargets.StateAuthority | RpcTargets.InputAuthority)]
+        public void RPC_Drop(MoveableObjectController body)
         {
-            if (_held is null || _held != body) return;
+            if (_held is null || _held != (ISelectable)body) return;
 
             _held.RB.useGravity = true;
             _held.RB.isKinematic = false;

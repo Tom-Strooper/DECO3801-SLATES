@@ -14,14 +14,22 @@ namespace Slates.PuzzleInteractions.Controllers
         [SerializeField] private TriggerVolume _activationVolume;
 
         [Networked] private bool _active { get; set; }
-        [Networked] private bool _enabled { get; set; } = true;
+        [Networked] private bool _enabled { get; set; }
 
         [Header("Visuals")]
         [SerializeField] private MeshRenderer _renderer;
         [SerializeField] private Material _inactiveMaterial;
         [SerializeField] private Material _activeMaterial;
 
-        public override void FixedUpdateNetwork()
+        public override void Spawned()
+        {
+            base.Spawned();
+
+            _active = false;
+            _enabled = true;
+        }
+
+        public override void Render()
         {
             _renderer.material = _active ? _activeMaterial : _inactiveMaterial;
         }
@@ -39,8 +47,10 @@ namespace Slates.PuzzleInteractions.Controllers
             }
         }
 
-        public void Reset() => Deactivate();
-        public void Disable() => _enabled = false;
+        [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority | RpcTargets.StateAuthority)]
+        public void RPC_Reset() => Deactivate();
+        [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority | RpcTargets.StateAuthority)]
+        public void RPC_Disable() => _enabled = false;
 
         private void Activate()
         {
