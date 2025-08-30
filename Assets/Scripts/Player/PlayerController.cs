@@ -124,6 +124,8 @@ namespace Slates.Player
                 return;
             }
 
+            Debug.DrawRay(_head.position, _head.forward * _maxSelectionDistance, Color.red, 1.0f);
+
             // Perform a raycast, ignoring the player's rigidbody, to see if the player is selecting anything in range
             RaycastHit hit;
             if (!Physics.Raycast(_head.position,
