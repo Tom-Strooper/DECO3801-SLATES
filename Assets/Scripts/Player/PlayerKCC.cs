@@ -20,6 +20,8 @@ public class PlayerKCC : NetworkBehaviour
 
     private float _verticalVelocity = 0.0f;
 
+    private Vector2 _antiJitterDistance = new Vector2(2, 1);
+
     private void Awake()
     {
         KCC = GetComponent<KCC>();
@@ -43,6 +45,11 @@ public class PlayerKCC : NetworkBehaviour
     {
         // Unbind the camera singleton
         CameraController.Instance.UnbindFromHead(_head);
+    }
+
+    private void InitializeKCC(KCC KCC)
+    {
+        KCC.Settings.AntiJitterDistance = _antiJitterDistance;
     }
 
     public override void FixedUpdateNetwork()
@@ -79,7 +86,7 @@ public class PlayerKCC : NetworkBehaviour
 
     public override void Render()
     {
-        UpdateCameraRotation();
+        // UpdateCameraRotation();
     }
 
     private void UpdateCameraRotation()
