@@ -5,8 +5,8 @@ namespace Slates.PuzzleInteractions
     public interface IPuzzleInteractor : IReferencedComponent<PuzzleInteractionController>
     {
         public string Key { get; }
-        public void RPC_Reset();
-        public void RPC_Disable();
+        public void Reset();
+        public void Disable();
     }
 
     public enum InteractorActivationMode

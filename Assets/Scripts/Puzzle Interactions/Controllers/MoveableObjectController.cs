@@ -24,19 +24,13 @@ namespace Slates.PuzzleInteractions.Controllers
             IsSelected = false;
         }
 
-        [Rpc(RpcSources.StateAuthority, RpcTargets.StateAuthority | RpcTargets.InputAuthority)]
         public void RPC_OnSelected(PlayerController player)
         {
-            if (!Runner.IsServer) return;
-
             IsSelected = true;
             player.RPC_Grab(this);
         }
-        [Rpc(RpcSources.StateAuthority, RpcTargets.StateAuthority | RpcTargets.InputAuthority)]
         public void RPC_OnDeselected(PlayerController player)
         {
-            if (!Runner.IsServer) return;
-
             IsSelected = false;
             player.RPC_Drop(this);
         }

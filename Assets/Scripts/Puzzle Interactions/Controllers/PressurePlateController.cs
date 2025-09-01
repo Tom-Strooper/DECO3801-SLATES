@@ -13,8 +13,8 @@ namespace Slates.PuzzleInteractions.Controllers
         [SerializeField] private InteractorActivationMode _mode;
         [SerializeField] private TriggerVolume _activationVolume;
 
-        [Networked] private bool _active { get; set; }
-        [Networked] private bool _enabled { get; set; }
+        [Networked] private NetworkBool _active { get; set; }
+        [Networked] private NetworkBool _enabled { get; set; }
 
         [Header("Visuals")]
         [SerializeField] private MeshRenderer _renderer;
@@ -47,10 +47,8 @@ namespace Slates.PuzzleInteractions.Controllers
             }
         }
 
-        [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority | RpcTargets.StateAuthority)]
-        public void RPC_Reset() => Deactivate();
-        [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority | RpcTargets.StateAuthority)]
-        public void RPC_Disable() => _enabled = false;
+        public void Reset() => Deactivate();
+        public void Disable() => _enabled = false;
 
         private void Activate()
         {

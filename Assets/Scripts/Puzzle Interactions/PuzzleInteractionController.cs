@@ -137,7 +137,7 @@ namespace Slates.PuzzleInteractions
             {
                 foreach (IPuzzleInteractor interactor in _interactors.Values)
                 {
-                    interactor.RPC_Reset();
+                    interactor.Reset();
                 }
             }
             if ((behaviour & PuzzleControllerBehaviour.ResetGuess) != 0)
@@ -148,7 +148,7 @@ namespace Slates.PuzzleInteractions
             {
                 foreach (IPuzzleInteractor interactor in _interactors.Values)
                 {
-                    interactor.RPC_Disable();
+                    interactor.Disable();
                 }
             }
         }

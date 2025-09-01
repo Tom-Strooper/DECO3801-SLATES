@@ -1,5 +1,5 @@
 using Fusion;
-using Fusion.Addons.SimpleKCC;
+using Fusion.Addons.KCC;
 using Slates.Camera;
 using Slates.Networking.Input;
 using Slates.PuzzleInteractions.Controllers;
@@ -8,10 +8,10 @@ using UnityEngine;
 
 namespace Slates.Player
 {
-    [RequireComponent(typeof(SimpleKCC))]
+    [RequireComponent(typeof(KCC))]
     public class PlayerController : NetworkBehaviour
     {
-        private SimpleKCC _controller;
+        private KCC _controller;
 
         // Networked values
         [Networked] private NetworkButtons PreviousButtons { get; set; }
@@ -36,9 +36,12 @@ namespace Slates.Player
 
         private ISelectable _held = null;
 
+        private static Vector2 _antiJitterDistance = new Vector2(0.1f, 0.1f);
+
         private void Awake()
         {
-            _controller = GetComponent<SimpleKCC>();
+            _controller = GetComponent<KCC>();
+            QualitySettings.vSyncCount = 2;
         }
 
         public override void Spawned()
@@ -52,6 +55,9 @@ namespace Slates.Player
 
             // Indicate to the camera that this player should be followed
             CameraController.Instance.BindToHead(_head);
+
+            // Apply smoothing
+            _controller.Settings.AntiJitterDistance = _antiJitterDistance;
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -68,18 +74,18 @@ namespace Slates.Player
                 data.direction.Normalize();
 
                 _verticalVelocity -= _gravity * Runner.DeltaTime;
-                if (_controller.IsGrounded && _verticalVelocity <= 0.0f)
+                if (_controller.Data.IsGrounded && _verticalVelocity <= 0.0f)
                 {
                     if (data.buttons.WasPressed(PreviousButtons, (int)InputButtons.Jump)) _verticalVelocity = 10.0f;
                     else _verticalVelocity = -1.0f;
                 }
 
                 Vector3 targetVelocity = (_controller.Transform.forward * data.direction.y + _controller.Transform.right * data.direction.x) * _maxMovementSpeed;
-                Vector3 velocity = _controller.RealVelocity + (targetVelocity - _controller.RealVelocity) * _accelerationCoefficient * Runner.DeltaTime;
+                Vector3 velocity = _controller.Data.RealVelocity + (targetVelocity - _controller.Data.RealVelocity) * _accelerationCoefficient * Runner.DeltaTime;
 
                 velocity.y = _verticalVelocity;
 
-                _controller.Move(velocity);
+                _controller.SetKinematicVelocity(velocity);
 
                 // TODO - Fix camera jitter
                 _controller.AddLookRotation(0.0f, data.look.x * _sensitivity * Runner.DeltaTime);
@@ -104,7 +110,7 @@ namespace Slates.Player
                 PreviousButtons = data.buttons;
             }
 
-            if (transform.position.y < -100.0f)
+            if (transform.position.y < -20.0f)
             {
                 _controller.SetPosition(Vector3.up);
             }
@@ -133,11 +139,7 @@ namespace Slates.Player
 
             // Perform a raycast, ignoring the player's rigidbody, to see if the player is selecting anything in range
             RaycastHit hit;
-            if (!Physics.Raycast(_head.position,
-                                 _head.forward,
-                                 out hit,
-                                 _maxSelectionDistance,
-                                 _interactionLayerMask.value)) return;
+            if (!Physics.Raycast(_head.position, _head.forward, out hit, _maxSelectionDistance, _interactionLayerMask.value)) return;
 
             if (hit.collider.attachedRigidbody?.GetComponent<ISelectable>() is not ISelectable selectable) return;
             if (selectable.IsSelected) return;

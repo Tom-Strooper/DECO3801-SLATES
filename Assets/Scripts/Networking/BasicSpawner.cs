@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
-using Slates.Networking.Input;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -77,6 +76,7 @@ namespace Slates.Networking
                 NetworkObject playerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
                 // Keep track of the players
                 _players.Add(player, playerObject);
+                _runner.SetPlayerObject(player, playerObject);
             }
         }
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
