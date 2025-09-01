@@ -6,23 +6,26 @@ public class PingMenuScript : MonoBehaviour
     [Header("Menu References")]
     public GameObject menuParent;      // The whole circular menu parent (enable/disable)
     public Transform cursor;           // Rotating cursor around the circle
-    public Transform sectorParent;     // Parent holding the 3 sectors
     public Camera playerCamera;        // Player's camera for raycasting
     public Transform pingParent;       // Where to spawn ping objects under
 
-    [Header("Ping Prefabs")]
-    public GameObject pingWarningPrefab;
-    public GameObject pingDefaultPrefab;
-    public GameObject pingLookHerePrefab;
+    [Header("Ping Prefab")]
+    public GameObject pingPrefab;      // The unified PingObjectParent prefab
 
     [Header("Ping Settings")]
-    public Transform player;           // Player reference for ScaledPingScript
-    public float cursorRadius = 50f;   // Radius of cursor from center
+    public Transform player;           // Player reference for distance calculations
+    public float cursorRadius = 45f;   // Radius of cursor from center
+
+    [Header("Camera Controller")]
+    public MonoBehaviour cameraController; // Reference to your camera controller script
 
     private bool menuActive = false;
     private int selectedSector = -1;
+    private GameObject activePing;     // Track currently spawned ping
 
-    private GameObject activePing;     // keep track of the currently spawned ping
+    // Store original cursor state
+    private CursorLockMode originalLockState;
+    private bool originalCursorVisible;
 
     void Start()
     {
@@ -40,9 +43,7 @@ public class PingMenuScript : MonoBehaviour
 
             // Left click confirm
             if (Mouse.current.leftButton.wasPressedThisFrame)
-            {
                 SelectPing();
-            }
         }
     }
 
@@ -51,48 +52,64 @@ public class PingMenuScript : MonoBehaviour
         // Middle mouse pressed → open menu
         if (Mouse.current.middleButton.wasPressedThisFrame)
         {
-            menuActive = true;
-            if (menuParent != null) menuParent.SetActive(true);
-
-            // TODO: disable camera controller here
-            // Example: playerCamera.GetComponent<CameraController>().enabled = false;
+            OpenMenu();
         }
 
         // Middle mouse released → close menu
         if (Mouse.current.middleButton.wasReleasedThisFrame)
         {
-            menuActive = false;
-            if (menuParent != null) menuParent.SetActive(false);
-
-            // TODO: re-enable camera controller
-            // Example: playerCamera.GetComponent<CameraController>().enabled = true;
+            CloseMenu();
         }
     }
 
-    void HighlightSector()
+    void OpenMenu()
     {
-        if (sectorParent == null) return;
+        menuActive = true;
+        if (menuParent != null) menuParent.SetActive(true);
 
-        for (int i = 0; i < sectorParent.childCount; i++)
-        {
-            // Enable only the active sector
-            sectorParent.GetChild(i).gameObject.SetActive(i == selectedSector);
-        }
+        // Store original cursor state
+        originalLockState = Cursor.lockState;
+        originalCursorVisible = Cursor.visible;
+
+        // Unlock cursor and make it visible for menu interaction
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // Disable camera controller
+        if (cameraController != null)
+            cameraController.enabled = false;
+    }
+
+    void CloseMenu()
+    {
+        menuActive = false;
+        if (menuParent != null) menuParent.SetActive(false);
+
+        // Restore original cursor state
+        Cursor.lockState = originalLockState;
+        Cursor.visible = originalCursorVisible;
+
+        // Re-enable camera controller
+        if (cameraController != null)
+            cameraController.enabled = true;
     }
 
     void UpdateCursor()
     {
         if (cursor == null) return;
 
-        // Get mouse position in screen space
+        // Get mouse position relative to screen center
         Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
         Vector2 mousePos = Mouse.current.position.ReadValue() - screenCenter;
 
-        // Get angle
+        // Only update if mouse has moved significantly from center
+        if (mousePos.magnitude < 10f) return;
+
+        // Calculate angle
         float angle = Mathf.Atan2(mousePos.y, mousePos.x) * Mathf.Rad2Deg;
         if (angle < 0) angle += 360f;
 
-        // Position cursor on circular menu
+        // Move cursor along circular menu
         Vector3 cursorPos = new Vector3(
             Mathf.Cos(angle * Mathf.Deg2Rad),
             Mathf.Sin(angle * Mathf.Deg2Rad),
@@ -101,56 +118,123 @@ public class PingMenuScript : MonoBehaviour
 
         cursor.localPosition = cursorPos;
 
-        // Determine selected sector (3 slices of 120° each)
+        // Determine selected sector (0 = warning, 1 = default, 2 = look here)
         selectedSector = Mathf.FloorToInt(angle / 120f) % 3;
-
-        // Highlight the correct sector
-        HighlightSector();
     }
 
     void SelectPing()
     {
-        if (selectedSector < 0) return;
-
-        GameObject prefabToSpawn = null;
-
-        switch (selectedSector)
+        if (selectedSector < 0 || pingPrefab == null)
         {
-            case 0: prefabToSpawn = pingWarningPrefab; break;
-            case 1: prefabToSpawn = pingDefaultPrefab; break;
-            case 2: prefabToSpawn = pingLookHerePrefab; break;
+            Debug.LogWarning("Cannot select ping: selectedSector=" + selectedSector + ", pingPrefab=" + (pingPrefab != null ? "assigned" : "null"));
+            return;
         }
 
-        if (prefabToSpawn != null)
+        if (playerCamera == null)
         {
-            // Remove old ping if it exists
-            if (activePing != null)
-                Destroy(activePing);
+            Debug.LogError("PlayerCamera is null! Assign it in the inspector.");
+            return;
+        }
 
-            // Cast ray from camera to where player is pointing
-            Ray ray = playerCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-            RaycastHit hit;
-            Vector3 spawnPos = player.position + playerCamera.transform.forward * 5f;
+        if (player == null)
+        {
+            Debug.LogError("Player transform is null! Assign it in the inspector.");
+            return;
+        }
 
-            if (Physics.Raycast(ray, out hit, 100f))
-            {
-                spawnPos = hit.point;
-            }
+        // Remove old ping if exists
+        if (activePing != null)
+            Destroy(activePing);
 
-            // Spawn new ping
-            activePing = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity, pingParent);
+        // Determine spawn position using screen center for raycast
+        Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
+        Ray ray = playerCamera.ScreenPointToRay(screenCenter);
+        RaycastHit hit;
+        Vector3 spawnPos = player.position + playerCamera.transform.forward * 5f;
 
-            // Assign ScaledPingScript target
-            ScaledPingScript pingScript = activePing.GetComponent<ScaledPingScript>();
-            if (pingScript != null)
-                pingScript.Tgt = player;
+        if (Physics.Raycast(ray, out hit, 100f))
+            spawnPos = hit.point;
 
-            // Close menu after placing ping
-            menuActive = false;
-            if (menuParent != null) menuParent.SetActive(false);
+        // Calculate rotation to face the player
+        Vector3 directionToPlayer = (player.position - spawnPos).normalized;
+        Quaternion facePlayerRotation = Quaternion.LookRotation(directionToPlayer, Vector3.up);
 
-            // TODO: re-enable camera controller
-            // Example: playerCamera.GetComponent<CameraController>().enabled = true;
+        // Spawn the PingObjectParent prefab with rotation facing player
+        activePing = Instantiate(pingPrefab, spawnPos, facePlayerRotation, pingParent);
+
+        if (activePing == null)
+        {
+            Debug.LogError("Failed to instantiate ping prefab!");
+            return;
+        }
+
+        // Try multiple ways to find the ScaledPingScript
+        ScaledPingScript sps = null;
+
+        // Method 1: Try to find "ScaledPing" child object
+        Transform scaledPingChild = activePing.transform.Find("ScaledPing");
+        if (scaledPingChild != null)
+        {
+            sps = scaledPingChild.GetComponent<ScaledPingScript>();
+        }
+
+        // Method 2: If not found, try getting it directly from the instantiated object
+        if (sps == null)
+        {
+            sps = activePing.GetComponent<ScaledPingScript>();
+        }
+
+        // Method 3: If still not found, try getting it from any child
+        if (sps == null)
+        {
+            sps = activePing.GetComponentInChildren<ScaledPingScript>();
+        }
+
+        // Initialize if found
+        if (sps != null)
+        {
+            sps.Init(player, spawnPos, selectedSector);
+        }
+        else
+        {
+            Debug.LogError("ScaledPingScript not found on ping prefab! Make sure your prefab has the ScaledPingScript component.");
+        }
+
+        // Close menu
+        CloseMenu();
+    }
+
+
+    // Alternative update method using mouse delta instead of absolute position
+    void UpdateCursorAlternative()
+    {
+        if (cursor == null) return;
+
+        // Get mouse delta movement
+        Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+        
+        // Only update if there's significant mouse movement
+        if (mouseDelta.magnitude < 0.1f) return;
+
+        // Get current cursor position and add delta
+        Vector3 currentPos = cursor.localPosition;
+        Vector2 currentPos2D = new Vector2(currentPos.x, currentPos.y);
+        
+        // Add scaled mouse delta
+        currentPos2D += mouseDelta * 0.5f; // Adjust multiplier as needed
+        
+        // Normalize to cursor radius
+        if (currentPos2D.magnitude > 0.1f)
+        {
+            currentPos2D = currentPos2D.normalized * cursorRadius;
+            
+            // Update cursor position
+            cursor.localPosition = new Vector3(currentPos2D.x, currentPos2D.y, 0);
+            
+            // Calculate sector based on angle
+            float angle = Mathf.Atan2(currentPos2D.y, currentPos2D.x) * Mathf.Rad2Deg;
+            if (angle < 0) angle += 360f;
+            selectedSector = Mathf.FloorToInt(angle / 120f) % 3;
         }
     }
 }
