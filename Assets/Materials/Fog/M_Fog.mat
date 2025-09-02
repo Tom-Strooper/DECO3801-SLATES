@@ -82,13 +82,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - Vector1_3079162E: 10
+    - Vector1_3079162E: 20
     - Vector1_49C84A1C: 1
     - Vector1_6E7FA0AB: 10
     - Vector1_6F7F40FD: 0.01
     - Vector1_72E37BDA: 2
     - Vector1_7C7BA310: 1
-    - Vector1_A5CA641B: 0.04
+    - Vector1_A5CA641B: 0.02
     - Vector1_D59E333A: 0
     - Vector1_E7067C2C: 2
     - _AddPrecomputedVelocity: 0
