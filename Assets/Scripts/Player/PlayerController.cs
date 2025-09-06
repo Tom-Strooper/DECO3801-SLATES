@@ -36,8 +36,6 @@ namespace Slates.Player
 
         private ISelectable _held = null;
 
-        private static Vector2 _antiJitterDistance = new Vector2(0.1f, 0.1f);
-
         private void Awake()
         {
             _controller = GetComponent<KCC>();
@@ -48,16 +46,8 @@ namespace Slates.Player
         {
             if (!HasInputAuthority) return;
 
-            // TODO - Gotta move this
-            // Fix the mouse in the centre of the screen and hide it
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-
             // Indicate to the camera that this player should be followed
             CameraController.Instance.BindToHead(_head);
-
-            // Apply smoothing
-            _controller.Settings.AntiJitterDistance = _antiJitterDistance;
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
