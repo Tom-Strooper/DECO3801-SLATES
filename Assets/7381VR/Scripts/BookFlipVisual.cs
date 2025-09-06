@@ -32,8 +32,8 @@ public class BookFlipVisual : MonoBehaviour
     public Transform bookRoot;                 // 一般拖 Book
     public bool forceFlipToFront = true;       // 强制只在书的“正面半空间”翻
     public bool invertRightAngle = false;      // 右页角度反向开关（万一你模型轴相反）
-    public bool invertLeftAngle  = false;      // 左页角度反向开关
-    public bool invertFrontDir   = false;      // 正面方向反向（book.forward 反了时勾上）
+    public bool invertLeftAngle = false;      // 左页角度反向开关
+    public bool invertFrontDir = false;      // 正面方向反向（book.forward 反了时勾上）
 
 
     [Header("Flip Angle")]
@@ -41,10 +41,10 @@ public class BookFlipVisual : MonoBehaviour
 
 
     [Header("Lift/Offset（抬页弧度）")]
-    public float liftUp      = 0.006f;         // 垂直抬高（米）
+    public float liftUp = 0.006f;         // 垂直抬高（米）
     public float liftForward = 0.020f;         // 朝“书的正面”抬出（米）
 
-        
+
     [Header("Optional Under Pages (static planes, not under pivots)")]
     public Renderer leftUnder;   // 显示 L-2
     public Renderer rightUnder;  // 显示 L+3
@@ -85,66 +85,66 @@ public class BookFlipVisual : MonoBehaviour
     }
 
     void LateUpdate()
-{
-    // 本地坐标系里的“正面方向”和“向上方向”
-    // 注意：我们要给 localPosition 赋值，所以需要把 world 的 forward/up 转成“父物体的局部方向”
-    Vector3 frontL = Vector3.forward;
-    Vector3 frontR = Vector3.forward;
-    Vector3 upL    = Vector3.up;
-    Vector3 upR    = Vector3.up;
-
-    if (leftPagePivot && leftPagePivot.parent && bookRoot)
     {
-        frontL = leftPagePivot.parent.InverseTransformDirection(bookRoot.forward).normalized;
-        upL    = leftPagePivot.parent.InverseTransformDirection(bookRoot.up).normalized;
+        // 本地坐标系里的“正面方向”和“向上方向”
+        // 注意：我们要给 localPosition 赋值，所以需要把 world 的 forward/up 转成“父物体的局部方向”
+        Vector3 frontL = Vector3.forward;
+        Vector3 frontR = Vector3.forward;
+        Vector3 upL = Vector3.up;
+        Vector3 upR = Vector3.up;
+
+        if (leftPagePivot && leftPagePivot.parent && bookRoot)
+        {
+            frontL = leftPagePivot.parent.InverseTransformDirection(bookRoot.forward).normalized;
+            upL = leftPagePivot.parent.InverseTransformDirection(bookRoot.up).normalized;
+        }
+        if (rightPagePivot && rightPagePivot.parent && bookRoot)
+        {
+            frontR = rightPagePivot.parent.InverseTransformDirection(bookRoot.forward).normalized;
+            upR = rightPagePivot.parent.InverseTransformDirection(bookRoot.up).normalized;
+        }
+
+        if (invertFrontDir) { frontL = -frontL; frontR = -frontR; }
+
+        // ---- 右页：0→1 映射到 0→-180（可反向） ----
+        if (rightPagePivot)
+        {
+            float angR = Mathf.Lerp(0f, -maxFlipAngleDeg, rightProgress);
+            if (invertRightAngle) angR = -angR;
+
+            float s = Mathf.Sin(Mathf.PI * Mathf.Clamp01(rightProgress)); // 0→1→0 的抬起权重
+
+            // 只在“书的正面半空间”抬起：前向位移始终非负
+            float forwardDisp = forceFlipToFront ? Mathf.Abs(s) * liftForward : s * liftForward;
+
+            rightPagePivot.localRotation = _rightInitRot * Quaternion.AngleAxis(angR, Vector3.up);
+            rightPagePivot.localPosition = _rightInitPos
+                                         + upR * (s * liftUp)
+                                         + frontR * forwardDisp;
+        }
+
+        // ---- 左页：0→1 映射到 0→+180（可反向） ----
+        if (leftPagePivot)
+        {
+            float angL = Mathf.Lerp(0f, +maxFlipAngleDeg, leftProgress);
+            if (invertLeftAngle) angL = -angL;
+
+            float s = Mathf.Sin(Mathf.PI * Mathf.Clamp01(leftProgress));
+            float forwardDisp = forceFlipToFront ? Mathf.Abs(s) * liftForward : s * liftForward;
+
+            leftPagePivot.localRotation = _leftInitRot * Quaternion.AngleAxis(angL, Vector3.up);
+            leftPagePivot.localPosition = _leftInitPos
+                                        + upL * (s * liftUp)
+                                        + frontL * forwardDisp;
+        }
     }
-    if (rightPagePivot && rightPagePivot.parent && bookRoot)
-    {
-        frontR = rightPagePivot.parent.InverseTransformDirection(bookRoot.forward).normalized;
-        upR    = rightPagePivot.parent.InverseTransformDirection(bookRoot.up).normalized;
-    }
-
-    if (invertFrontDir) { frontL = -frontL; frontR = -frontR; }
-
-    // ---- 右页：0→1 映射到 0→-180（可反向） ----
-    if (rightPagePivot)
-    {
-        float angR = Mathf.Lerp(0f, -maxFlipAngleDeg, rightProgress);
-        if (invertRightAngle) angR = -angR;
-
-        float s = Mathf.Sin(Mathf.PI * Mathf.Clamp01(rightProgress)); // 0→1→0 的抬起权重
-
-        // 只在“书的正面半空间”抬起：前向位移始终非负
-        float forwardDisp = forceFlipToFront ? Mathf.Abs(s) * liftForward : s * liftForward;
-
-        rightPagePivot.localRotation = _rightInitRot * Quaternion.AngleAxis(angR, Vector3.up);
-        rightPagePivot.localPosition = _rightInitPos
-                                     + upR    * (s * liftUp)
-                                     + frontR *  forwardDisp;
-    }
-
-    // ---- 左页：0→1 映射到 0→+180（可反向） ----
-    if (leftPagePivot)
-    {
-        float angL = Mathf.Lerp(0f,  +maxFlipAngleDeg, leftProgress);
-        if (invertLeftAngle) angL = -angL;
-
-        float s = Mathf.Sin(Mathf.PI * Mathf.Clamp01(leftProgress));
-        float forwardDisp = forceFlipToFront ? Mathf.Abs(s) * liftForward : s * liftForward;
-
-        leftPagePivot.localRotation = _leftInitRot * Quaternion.AngleAxis(angL, Vector3.up);
-        leftPagePivot.localPosition = _leftInitPos
-                                    + upL    * (s * liftUp)
-                                    + frontL *  forwardDisp;
-    }
-}
 
 
     // =============== 外部调用：交互脚本实时写入进度 ===============
     public void SetDragProgress(bool isRightPage, float progress01)
     {
         if (isRightPage) rightProgress = Mathf.Clamp01(progress01);
-        else             leftProgress  = Mathf.Clamp01(progress01);
+        else leftProgress = Mathf.Clamp01(progress01);
     }
 
     // =============== 外部调用：松手后的补间（到 0 或 1） ===============
@@ -205,7 +205,7 @@ public class BookFlipVisual : MonoBehaviour
         // 背面（翻动过程中会看到）
         SetTex(leftBack, GetPageTex(L - 1)); // 上一页的右面
         SetTex(rightBack, GetPageTex(L + 2)); // 下一页的左面
-        
+
         if (leftUnder)
         {
             var tex = GetPageTex(L - 2);
@@ -233,7 +233,7 @@ public class BookFlipVisual : MonoBehaviour
         if (pages == null || pages.Length == 0) return 0;
         // 最大可用左页：确保 L 和 L+1 都在范围内
         int maxRight = pages.Length - 1;
-        int maxLeft  = Mathf.Max(0, maxRight - 1);
+        int maxLeft = Mathf.Max(0, maxRight - 1);
         // 向下取偶数
         if ((maxLeft & 1) == 1) maxLeft -= 1;
         return Mathf.Max(0, maxLeft);

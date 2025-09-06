@@ -9,17 +9,17 @@ public class LeftHandPalmShowHide : MonoBehaviour
     public GameObject bookRoot;
 
     [Header("Palm-up thresholds (hysteresis)")]
-    [Range(0f,1f)] public float palmUpDotToOpen = 0.65f; // 更严格
-    [Range(0f,1f)] public float palmUpDotToClose = 0.50f; // 略宽松
+    [Range(0f, 1f)] public float palmUpDotToOpen = 0.65f; // 更严格
+    [Range(0f, 1f)] public float palmUpDotToClose = 0.50f; // 略宽松
 
     [Header("Hold times & cooldown")]
-    public float openHoldSeconds  = 0.35f; // 出现需更久
+    public float openHoldSeconds = 0.35f; // 出现需更久
     public float closeHoldSeconds = 0.25f; // 隐藏稍短
-    public float cooldownSeconds  = 0.60f; // 切换后冷却
+    public float cooldownSeconds = 0.60f; // 切换后冷却
 
     [Header("Fist / open-hand detection")]
-    [Range(0.3f,1.5f)] public float fistThresholdFactor = 0.90f;
-    [Range(0.3f,1.5f)] public float openHandFactor     = 1.05f; // 张开手的“更大”阈值
+    [Range(0.3f, 1.5f)] public float fistThresholdFactor = 0.90f;
+    [Range(0.3f, 1.5f)] public float openHandFactor = 1.05f; // 张开手的“更大”阈值
 
     [Header("Motion gating")]
     public float maxHandSpeed = 0.20f; // m/s，超过认为在移动，不触发

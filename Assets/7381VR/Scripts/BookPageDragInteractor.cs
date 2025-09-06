@@ -19,11 +19,11 @@ public class BookPageDragInteractor : MonoBehaviour
 
     [Header("翻页判定（角度优先）")]
     public bool useAngleThreshold = true;
-    [Range(0f,180f)] public float commitAngleDeg = 120f;
-    [Range(0.2f,0.9f)] public float commitProgress = 0.5f;
+    [Range(0f, 180f)] public float commitAngleDeg = 120f;
+    [Range(0.2f, 0.9f)] public float commitProgress = 0.5f;
 
     [Header("手感")]
-    [Range(0f,0.2f)] public float minLiftOnSelect = 0.04f;
+    [Range(0f, 0.2f)] public float minLiftOnSelect = 0.04f;
 
     bool isDragging = false;
     bool dragIsRightPage = false;
@@ -35,13 +35,13 @@ public class BookPageDragInteractor : MonoBehaviour
     {
         if (rightInteractable)
         {
-            rightInteractable.selectEntered.AddListener(a=>BeginDrag(a,true,  flipVisual?flipVisual.rightProgress:0f));
-            rightInteractable.selectExited .AddListener(a=>EndDrag  (true,  flipVisual?flipVisual.rightProgress:0f));
+            rightInteractable.selectEntered.AddListener(a => BeginDrag(a, true, flipVisual ? flipVisual.rightProgress : 0f));
+            rightInteractable.selectExited.AddListener(a => EndDrag(true, flipVisual ? flipVisual.rightProgress : 0f));
         }
         if (leftInteractable)
         {
-            leftInteractable.selectEntered .AddListener(a=>BeginDrag(a,false, flipVisual?flipVisual.leftProgress :0f));
-            leftInteractable.selectExited  .AddListener(a=>EndDrag  (false, flipVisual?flipVisual.leftProgress :0f));
+            leftInteractable.selectEntered.AddListener(a => BeginDrag(a, false, flipVisual ? flipVisual.leftProgress : 0f));
+            leftInteractable.selectExited.AddListener(a => EndDrag(false, flipVisual ? flipVisual.leftProgress : 0f));
         }
     }
     void OnDisable()
@@ -49,18 +49,18 @@ public class BookPageDragInteractor : MonoBehaviour
         if (rightInteractable)
         {
             rightInteractable.selectEntered.RemoveAllListeners();
-            rightInteractable.selectExited .RemoveAllListeners();
+            rightInteractable.selectExited.RemoveAllListeners();
         }
         if (leftInteractable)
         {
             leftInteractable.selectEntered.RemoveAllListeners();
-            leftInteractable.selectExited .RemoveAllListeners();
+            leftInteractable.selectExited.RemoveAllListeners();
         }
     }
 
     void Update()
     {
-        if (!isDragging || flipVisual==null || currentInteractor==null) return;
+        if (!isDragging || flipVisual == null || currentInteractor == null) return;
 
         Vector3 curWorld = GetInteractorPointWorld(currentInteractor, out bool ok);
         if (!ok) return;
@@ -87,7 +87,7 @@ public class BookPageDragInteractor : MonoBehaviour
         if (!ok) return;
 
         startLocalPoint = ToBookLocal(world);
-        startProgress   = Mathf.Max(currentProgress, minLiftOnSelect);
+        startProgress = Mathf.Max(currentProgress, minLiftOnSelect);
         flipVisual.SetDragProgress(dragIsRightPage, startProgress);
     }
 

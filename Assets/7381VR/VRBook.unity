@@ -944,6 +944,11 @@ Transform:
   - {fileID: 491477802}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &741217915 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -5988948318033949128, guid: adbb625a9d0d14a3ba065204c289d850, type: 3}
+  m_PrefabInstance: {fileID: 2045727540}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &767362754
 GameObject:
   m_ObjectHideFlags: 0
@@ -1076,6 +1081,11 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     m_Variable: {fileID: 0}
+--- !u!23 &837273914 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -5181957333327915261, guid: adbb625a9d0d14a3ba065204c289d850, type: 3}
+  m_PrefabInstance: {fileID: 2045727540}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &840384978
 GameObject:
   m_ObjectHideFlags: 0
@@ -1688,7 +1698,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1410cbaaadf84a7aaa6459d37ad21b3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Renderer: {fileID: 0}
+  m_Renderer: {fileID: 837273914}
   m_MaterialIndex: 0
 --- !u!1 &1111748062
 GameObject:
@@ -2050,7 +2060,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1410cbaaadf84a7aaa6459d37ad21b3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Renderer: {fileID: 0}
+  m_Renderer: {fileID: 741217915}
   m_MaterialIndex: 0
 --- !u!1 &1350577564
 GameObject:

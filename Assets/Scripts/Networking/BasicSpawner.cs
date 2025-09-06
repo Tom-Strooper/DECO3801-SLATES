@@ -12,7 +12,12 @@ namespace Slates.Networking
     {
         private NetworkRunner _runner;
 
-        [SerializeField] private NetworkPrefabRef _playerPrefab;
+        [SerializeField] private NetworkPrefabRef _vrPlayerPrefab;
+        [SerializeField] private NetworkPrefabRef _kbmPlayerPrefab;
+
+        [SerializeField] private Transform _vrSpawn;
+        [SerializeField] private Transform _kbmSpawnOrigin;
+        [SerializeField] private float _kbmSpawnRadius = 2.0f;
 
         private InputAction hostGameAction, joinGameAction;
 
@@ -73,7 +78,7 @@ namespace Slates.Networking
             {
                 // Create a unique spawn position for the player
                 Vector3 spawnPosition = new Vector3((player.RawEncoded % runner.Config.Simulation.PlayerCount) * 3.0f, 1.0f, 0.0f);
-                NetworkObject playerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
+                NetworkObject playerObject = runner.Spawn(_kbmPlayerPrefab, spawnPosition, Quaternion.identity, player);
                 // Keep track of the players
                 _players.Add(player, playerObject);
                 _runner.SetPlayerObject(player, playerObject);

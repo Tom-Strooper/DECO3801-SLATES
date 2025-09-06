@@ -61,7 +61,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets
         {
             if (m_ClimbTeleportInteractor == null)
             {
-                if (!ComponentLocatorUtility<ClimbTeleportInteractor>.TryFindComponent(out m_ClimbTeleportInteractor))
+                if (!FindAnyObjectByType<ClimbTeleportInteractor>().TryGetComponent(out m_ClimbTeleportInteractor))
                 {
                     Debug.LogError($"Could not find {nameof(ClimbTeleportInteractor)} in scene.");
                     enabled = false;
