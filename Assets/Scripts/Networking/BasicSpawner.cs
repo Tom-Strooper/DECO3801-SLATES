@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
+using TMPro;
+using UnityEditor.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace Slates.Networking
 {
@@ -13,10 +16,12 @@ namespace Slates.Networking
         private NetworkRunner _runner;
 
         [SerializeField] private NetworkPrefabRef _playerPrefab;
+        [SerializeField] private Text _lobbyCodeOnHUD;
 
         private InputAction hostGameAction, joinGameAction;
 
         private Dictionary<PlayerRef, NetworkObject> _players = new Dictionary<PlayerRef, NetworkObject>();
+        private string _lobbyCode;
 
         private void Awake()
         {
@@ -34,6 +39,8 @@ namespace Slates.Networking
 
         private async void StartGame(GameMode mode)
         {
+            Debug.Log("Starting game...");
+            Debug.Log(mode);
             // Create a Fusion NetworkRunner
             _runner = gameObject.AddComponent<NetworkRunner>();
 
@@ -47,15 +54,27 @@ namespace Slates.Networking
             NetworkSceneInfo sceneInfo = new NetworkSceneInfo();
             if (scene.IsValid) sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
 
+            if (mode == GameMode.Host)
+            {
+                Debug.Log("Generating lobby code...");
+                System.Random r = new System.Random();
+                _lobbyCode = "Test";
+            }
+
+            Debug.Log(_lobbyCode);
+
+            _lobbyCodeOnHUD.text = "Lobby Code: " + _lobbyCode;
+
             // Start or join (depends on game mode) a game session
             await _runner.StartGame(new StartGameArgs()
             {
                 GameMode = mode,
-                SessionName = "TestRoom",
+                SessionName = _lobbyCode,
                 Scene = scene, // This only matters if the game is started by a host - clients must use host's scene
                 SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
             });
         }
+
 
         private void OnGUI()
         {
@@ -66,6 +85,7 @@ namespace Slates.Networking
                 if (GUI.Button(new Rect(0, 40, 200, 40), "Join")) StartGame(GameMode.Client);
             }
         }
+        
 
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
         {
@@ -90,6 +110,11 @@ namespace Slates.Networking
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
             }
+        }
+
+        public NetworkRunner GetRunner()
+        {
+            return _runner;
         }
 
         public void OnConnectedToServer(NetworkRunner runner) { }
