@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
-using TMPro;
-using UnityEditor.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -58,6 +56,11 @@ namespace Slates.Networking
             {
                 Debug.Log("Generating lobby code...");
                 System.Random r = new System.Random();
+                _lobbyCode = "Test";
+            }
+            else if (mode == GameMode.Client)
+            {
+                Debug.Log("Finding host...");
                 _lobbyCode = "Test";
             }
 
