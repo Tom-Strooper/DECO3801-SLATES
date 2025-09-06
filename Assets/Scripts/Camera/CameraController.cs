@@ -1,32 +1,34 @@
 using UnityEngine;
 
-public class CameraController : MonoBehaviour
+namespace Slates.Camera
 {
-    public static CameraController Instance { get; private set; } = null;
-
-    private void Awake()
+    public class CameraController : MonoBehaviour
     {
-        if (Instance is null) Instance = this;
-        else Destroy(this);
-    }
+        public static CameraController Instance { get; private set; } = null;
 
-    private void OnDestroy()
-    {
-        if (Instance == this) Instance = null;
-    }
+        private void Awake()
+        {
+            if (Instance is null) Instance = this;
+            else Destroy(this);
+        }
 
-    public void BindToHead(Transform head)
-    {
-        // Parent the camera to the player
-        transform.SetParent(head);
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
 
-        transform.localPosition = Vector3.zero;
-        transform.localRotation = Quaternion.identity;
-    }
+        public void BindToHead(Transform head)
+        {
+            // Parent the camera to the player
+            transform.SetParent(head);
 
-    public void UnbindFromHead(Transform head)
-    {
-        // Parent the camera to the root transform of the scene
-        transform.SetParent(head.root);
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+        }
+        public void UnbindFromHead(Transform head)
+        {
+            // Parent the camera to the root transform of the scene
+            transform.SetParent(head.root);
+        }
     }
 }

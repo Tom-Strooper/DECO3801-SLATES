@@ -1,14 +1,20 @@
 using Fusion;
 using UnityEngine;
 
-public enum InputButtons
+namespace Slates.Networking.Input
 {
-    Jump,
-}
+    public enum InputButtons
+    {
+        Jump,
+        Select,
+        Interact
+    }
 
-public struct NetworkInputData : INetworkInput
-{
-    public Vector2 direction;
-    public Vector2 look;
-    public NetworkButtons buttons;
+    public struct NetworkInputData : INetworkInput
+    {
+        public Vector2 direction;
+        public Vector2 look;
+        public NetworkButtons buttons;
+    }
+
 }
