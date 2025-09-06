@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Menu Scenes/KBM Main Menu.unity
+    guid: 35d2ba1d2ebb00a43aeb9d812c134fb7
+  - enabled: 1
     path: Assets/Scenes/Puzzles Test Scene.unity
     guid: e10bde8b995e6a647afb73cef5e40db6
   m_configObjects:

@@ -126,7 +126,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - Color_2F812B48: {r: 0.78, g: 0.78, b: 0.78, a: 0}
-    - Color_7A0CA90F: {r: 0.46226418, g: 0.46226418, b: 0.46226418, a: 0}
+    - Color_7A0CA90F: {r: 0.426, g: 0.426, b: 0.426, a: 0}
     - Vector4_6875CAB3: {r: 1, g: 0, b: 0, a: 90}
     - Vector4_D923B27C: {r: 0, g: 1, b: -1, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
