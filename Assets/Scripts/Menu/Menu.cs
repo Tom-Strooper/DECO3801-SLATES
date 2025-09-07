@@ -1,4 +1,3 @@
-using Slates.Networking;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -6,21 +5,29 @@ using UnityEngine.SceneManagement;
 public class Menu : MonoBehaviour
 {
     [SerializeField] TMP_InputField lobbyCodeInput;
+    private BackgroundInfo _backgroundInfo;
+
+    private void Awake()
+    {
+        _backgroundInfo = GameObject.Find("Background Info").GetComponent<BackgroundInfo>();
+    }
 
     public void OnJoinButton()
     {
         string lobbyCode = lobbyCodeInput.text;
         if (!string.IsNullOrEmpty(lobbyCode))
         {
-            Debug.Log(lobbyCode);
-            Debug.Log("Client");
+            _backgroundInfo.SetLobbyCode(lobbyCode);
+            _backgroundInfo.SetPlayerMode(Fusion.GameMode.Client);
             SceneManager.LoadScene(1);
         }
     }
 
     public void OnHostButton()
     {
-        Debug.Log("Host");
+        System.Random r = new System.Random();
+        _backgroundInfo.SetLobbyCode(r.Next(1000000).ToString("D6"));
+        _backgroundInfo.SetPlayerMode(Fusion.GameMode.Host);
         SceneManager.LoadScene(1);
     }
 

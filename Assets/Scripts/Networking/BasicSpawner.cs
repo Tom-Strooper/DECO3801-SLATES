@@ -16,29 +16,38 @@ namespace Slates.Networking
         [SerializeField] private NetworkPrefabRef _playerPrefab;
         [SerializeField] private Text _lobbyCodeOnHUD;
 
+        private BackgroundInfo _backgroundInfo;
+
         private InputAction hostGameAction, joinGameAction;
 
         private Dictionary<PlayerRef, NetworkObject> _players = new Dictionary<PlayerRef, NetworkObject>();
         private string _lobbyCode;
+        private GameMode _playerMode;
 
         private void Awake()
         {
-            hostGameAction = InputSystem.actions.FindAction("Host");
-            joinGameAction = InputSystem.actions.FindAction("Join");
+            _backgroundInfo = GameObject.Find("Background Info").GetComponent<BackgroundInfo>();
+            _lobbyCode = _backgroundInfo.GetLobbyCode();
+            _playerMode = _backgroundInfo.GetPlayerMode();
+            //hostGameAction = InputSystem.actions.FindAction("Host");
+            //joinGameAction = InputSystem.actions.FindAction("Join");
+
+            Debug.Log(_backgroundInfo.GetLobbyCode());
+            StartGame();
         }
 
         private void Update()
         {
             if (_runner is not null) return;
 
-            if (hostGameAction.IsPressed()) StartGame(GameMode.Host);
-            if (joinGameAction.IsPressed()) StartGame(GameMode.Client);
+            //if (hostGameAction.IsPressed()) StartGame(GameMode.Host);
+            //if (joinGameAction.IsPressed()) StartGame(GameMode.Client);
         }
 
-        private async void StartGame(GameMode mode)
+        private async void StartGame()
         {
             Debug.Log("Starting game...");
-            Debug.Log(mode);
+            Debug.Log(_playerMode);
             // Create a Fusion NetworkRunner
             _runner = gameObject.AddComponent<NetworkRunner>();
 
@@ -52,33 +61,28 @@ namespace Slates.Networking
             NetworkSceneInfo sceneInfo = new NetworkSceneInfo();
             if (scene.IsValid) sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
 
-            if (mode == GameMode.Host)
+            if (_playerMode == GameMode.Host)
             {
-                Debug.Log("Generating lobby code...");
-                System.Random r = new System.Random();
-                _lobbyCode = "Test";
+                Debug.Log("Using lobby code: " + _lobbyCode);
             }
-            else if (mode == GameMode.Client)
+            else if (_playerMode == GameMode.Client)
             {
-                Debug.Log("Finding host...");
-                _lobbyCode = "Test";
+                Debug.Log("Finding host " + _lobbyCode);
             }
-
-            Debug.Log(_lobbyCode);
 
             _lobbyCodeOnHUD.text = "Lobby Code: " + _lobbyCode;
 
             // Start or join (depends on game mode) a game session
             await _runner.StartGame(new StartGameArgs()
             {
-                GameMode = mode,
+                GameMode = _playerMode,
                 SessionName = _lobbyCode,
                 Scene = scene, // This only matters if the game is started by a host - clients must use host's scene
                 SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
             });
         }
 
-
+/*
         private void OnGUI()
         {
             // Create a simple placeholder ui for hosting/joining game
@@ -88,6 +92,7 @@ namespace Slates.Networking
                 if (GUI.Button(new Rect(0, 40, 200, 40), "Join")) StartGame(GameMode.Client);
             }
         }
+        */
         
 
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
