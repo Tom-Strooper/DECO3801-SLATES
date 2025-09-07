@@ -5,6 +5,8 @@ namespace Slates.PuzzleInteractions.Controllers
 {
     public class BookController : MonoBehaviour
     {
+        private const float MoveAngleThreshold = 1.0f * Mathf.Deg2Rad;
+
         [Header("Transform References")]
         [SerializeField, Tooltip("Point at the base of the spine of the book")] private Transform _spine;
         [SerializeField, Tooltip("Bottom left corner of left side of book")] private Transform _leftSideCorner;
@@ -37,7 +39,7 @@ namespace Slates.PuzzleInteractions.Controllers
         [SerializeField] private GameObject[] _pageUIs;
 
         [Header("Animation Settings")]
-        [SerializeField, Range(0.0f, 180.0f)] private float _autoTurnAngularSpeed;
+        [SerializeField, Range(0.0f, 720.0f)] private float _autoTurnAngularSpeed;
 
         public bool CanBeginPageTurn => _dragStatus == DragStatus.NoDrag;
 
@@ -61,7 +63,7 @@ namespace Slates.PuzzleInteractions.Controllers
 
             bool sameDirectionCommit = (_didDragFromRight && _dragStatus == DragStatus.DraggingFromRight)
                                     || (!_didDragFromRight && _dragStatus == DragStatus.DraggingFromLeft);
-            _dragProgress += (sameDirectionCommit ? 1.0f : -1.0f) * _autoTurnAngularSpeed / 180.0f * Time.deltaTime;
+            _dragProgress += (sameDirectionCommit ? 1.0f : -1.0f) * _autoTurnAngularSpeed / 360.0f * Time.deltaTime; // This isn't exactly angular velocity, but i can't be bothered to figure this out before sprint end
             if ((sameDirectionCommit && _dragProgress + float.Epsilon >= 1.0f)
              || (!sameDirectionCommit && _dragProgress - float.Epsilon <= 0.0f))
             {
@@ -92,49 +94,48 @@ namespace Slates.PuzzleInteractions.Controllers
 
             if (_didDragFromRight)
             {
-                minAngle = MaxAngleRight;
-                maxAngle = MaxAngleLeft;
+                minAngle = MaxAngleRight - MoveAngleThreshold;
+                maxAngle = MaxAngleLeft + MoveAngleThreshold;
             }
             else
             {
-                minAngle = MaxAngleLeft;
-                maxAngle = MaxAngleRight;
+                minAngle = MaxAngleLeft + MoveAngleThreshold;
+                maxAngle = MaxAngleRight - MoveAngleThreshold;
             }
 
-            float angleFromInitial = Mathf.Lerp(0.0f, maxAngle - minAngle, _dragProgress);
+            float angleFromInitial = Mathf.Lerp(0.0f, maxAngle - minAngle, Mathf.Clamp01(_dragProgress));
 
             if (_didDragFromRight) MoveRightPage(angleFromInitial);
             else MoveLeftPage(angleFromInitial);
         }
 
-        public void StartDrag(Vector3 from)
+        public bool StartDrag(Vector3 from)
         {
             // Don't start dragging until page has completely flipped
-            if (_dragStatus != DragStatus.NoDrag) return;
-
-            Debug.Log($"Drag starting from {from}");
-            _dragStartPoint = from;
+            if (_dragStatus != DragStatus.NoDrag) return false;
 
             if (IsOnRightSide(from))
             {
-                if (_leftIndex >= LastLeftPageIndex) return;
+                if (_leftIndex >= LastLeftPageIndex) return false;
 
                 _dragStatus = DragStatus.DraggingFromRight;
                 _didDragFromRight = true;
             }
             else
             {
-                if (_leftIndex <= 0) return;
+                if (_leftIndex <= 0) return false;
 
                 _dragStatus = DragStatus.DraggingFromLeft;
                 _didDragFromRight = false;
             }
 
+            _dragStartPoint = from;
             UpdateDrag(from);
+
+            return true;
         }
         public void EndDrag(Vector3 to)
         {
-            Debug.Log($"Drag ending to {to}");
             // We shouldn't do anything if the page is not being dragged
             if (_dragStatus == DragStatus.NoDrag) return;
 
@@ -199,7 +200,7 @@ namespace Slates.PuzzleInteractions.Controllers
 
         private int LastLeftPageIndex => _pages.Length - (_pages.Length % 2);
 
-        private bool IsOnRightSide(Vector3 point) => Vector3.Dot(point - _spine.position, SpineRight) >= 0.0f;
+        private bool IsOnRightSide(Vector3 point) => Vector3.Dot(point - _spine.position, BookRight) >= 0.0f;
 
         // 0.0f when point on at drag start point, 1.0f when point on left edge of book
         private float RightProgress(Vector3 point) => Mathf.Clamp01(Vector3.Dot(point - _dragStartPoint, BookLeft)

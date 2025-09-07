@@ -55,10 +55,8 @@ namespace Slates.DebugUtils
                     if (hit.collider?.GetComponentInParent<BookController>() is not BookController book) return;
                     if (book != _book || !_book.CanBeginPageTurn) return;
 
-                    _bookSelected = true;
-
                     // Start dragging
-                    _book.StartDrag(hit.point);
+                    _bookSelected = _book.StartDrag(hit.point);
                 }
             }
 
