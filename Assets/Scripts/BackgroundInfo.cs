@@ -1,5 +1,6 @@
 using Fusion;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // going to use this class to store stuff like the lobby code
 // will use DontDestroyOnLoad to let it persist throughout scenes
@@ -12,6 +13,7 @@ public class BackgroundInfo : MonoBehaviour
     void Awake()
     {
         DontDestroyOnLoad(this.gameObject);
+        SceneManager.LoadScene(1);
     }
 
     public void SetPlayerMode(GameMode mode)

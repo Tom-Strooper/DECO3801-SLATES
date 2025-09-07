@@ -29,25 +29,19 @@ namespace Slates.Networking
             _backgroundInfo = GameObject.Find("Background Info").GetComponent<BackgroundInfo>();
             _lobbyCode = _backgroundInfo.GetLobbyCode();
             _playerMode = _backgroundInfo.GetPlayerMode();
-            //hostGameAction = InputSystem.actions.FindAction("Host");
-            //joinGameAction = InputSystem.actions.FindAction("Join");
 
-            Debug.Log(_backgroundInfo.GetLobbyCode());
             StartGame();
         }
 
         private void Update()
         {
             if (_runner is not null) return;
-
-            //if (hostGameAction.IsPressed()) StartGame(GameMode.Host);
-            //if (joinGameAction.IsPressed()) StartGame(GameMode.Client);
+            if (_runner is null) Debug.Log("BasicSpawner: null runner");
+            return;
         }
 
         private async void StartGame()
         {
-            Debug.Log("Starting game...");
-            Debug.Log(_playerMode);
             // Create a Fusion NetworkRunner
             _runner = gameObject.AddComponent<NetworkRunner>();
 
@@ -82,19 +76,6 @@ namespace Slates.Networking
             });
         }
 
-/*
-        private void OnGUI()
-        {
-            // Create a simple placeholder ui for hosting/joining game
-            if (_runner is null)
-            {
-                if (GUI.Button(new Rect(0, 0, 200, 40), "Host")) StartGame(GameMode.Host);
-                if (GUI.Button(new Rect(0, 40, 200, 40), "Join")) StartGame(GameMode.Client);
-            }
-        }
-        */
-        
-
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
         {
             if (_runner.IsServer)
@@ -109,6 +90,7 @@ namespace Slates.Networking
         }
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
         {
+            Debug.Log("BasicSpawner: OnPlayerLeft");
             if (_players.ContainsKey(player))
             {
                 // Despawn the player
@@ -140,7 +122,11 @@ namespace Slates.Networking
         public void OnSceneLoadDone(NetworkRunner runner) { }
         public void OnSceneLoadStart(NetworkRunner runner) { }
         public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
-        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
+        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+        {
+            Debug.Log("BasicSpawner.OnShutdown: Connection to host " + _lobbyCode + " failed!");
+            SceneManager.LoadScene(1);
+        }
         public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
     }
 }

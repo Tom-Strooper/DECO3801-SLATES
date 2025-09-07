@@ -19,7 +19,7 @@ public class Menu : MonoBehaviour
         {
             _backgroundInfo.SetLobbyCode(lobbyCode);
             _backgroundInfo.SetPlayerMode(Fusion.GameMode.Client);
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene(2);
         }
     }
 
@@ -28,7 +28,7 @@ public class Menu : MonoBehaviour
         System.Random r = new System.Random();
         _backgroundInfo.SetLobbyCode(r.Next(1000000).ToString("D6"));
         _backgroundInfo.SetPlayerMode(Fusion.GameMode.Host);
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(2);
     }
 
     public void OnQuitButton()
