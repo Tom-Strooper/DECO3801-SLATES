@@ -10,26 +10,26 @@ namespace Slates.Networking.Input
     // Implementation based off MultiClimb Tutorial on Photon
     public class NetworkInputManager : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCallbacks
     {
-        private InputAction moveAction,
-                            lookAction,
-                            jumpAction,
-                            selectAction,
-                            interactAction,
-                            pauseAction;
+        private InputAction _moveAction,
+                            _lookAction,
+                            _jumpAction,
+                            _selectAction,
+                            _interactAction,
+                            _pauseAction;
 
         private NetworkInputData _input;
         private bool _reset = true;
 
         private void Awake()
         {
-            moveAction = InputSystem.actions.FindAction("Move");
-            lookAction = InputSystem.actions.FindAction("Look");
+            _moveAction = InputSystem.actions.FindAction("Move");
+            _lookAction = InputSystem.actions.FindAction("Look");
 
-            jumpAction = InputSystem.actions.FindAction("Jump");
-            selectAction = InputSystem.actions.FindAction("Select");
-            interactAction = InputSystem.actions.FindAction("Interact");
+            _jumpAction = InputSystem.actions.FindAction("Jump");
+            _selectAction = InputSystem.actions.FindAction("Select");
+            _interactAction = InputSystem.actions.FindAction("Interact");
 
-            pauseAction = InputSystem.actions.FindAction("Pause");
+            _pauseAction = InputSystem.actions.FindAction("Pause");
         }
 
         public void BeforeUpdate()
@@ -41,7 +41,7 @@ namespace Slates.Networking.Input
             }
 
             // Show/hide cursor
-            if (pauseAction.WasPressedThisFrame())
+            if (_pauseAction.WasPressedThisFrame())
             {
                 // TODO - Pause/unpause
                 if (Cursor.lockState == CursorLockMode.Locked)
@@ -61,12 +61,12 @@ namespace Slates.Networking.Input
 
             NetworkButtons buttons = new NetworkButtons();
 
-            _input.direction += moveAction.ReadValue<Vector2>();
-            _input.look += lookAction.ReadValue<Vector2>();
+            _input.direction += _moveAction.ReadValue<Vector2>();
+            _input.look += _lookAction.ReadValue<Vector2>();
 
-            buttons.Set((int)InputButtons.Jump, jumpAction.IsPressed());
-            buttons.Set((int)InputButtons.Select, selectAction.IsPressed());
-            buttons.Set((int)InputButtons.Interact, interactAction.IsPressed());
+            buttons.Set((int)InputButtons.Jump, _jumpAction.IsPressed());
+            buttons.Set((int)InputButtons.Select, _selectAction.IsPressed());
+            buttons.Set((int)InputButtons.Interact, _interactAction.IsPressed());
 
             _input.buttons = new NetworkButtons(_input.buttons.Bits | buttons.Bits);
         }
