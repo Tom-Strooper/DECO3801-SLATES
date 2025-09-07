@@ -7,7 +7,8 @@ namespace Slates.Networking.Input
     {
         Jump,
         Select,
-        Interact
+        Interact,
+        Escape
     }
 
     public struct NetworkInputData : INetworkInput

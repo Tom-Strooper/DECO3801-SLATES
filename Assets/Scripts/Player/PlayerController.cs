@@ -38,9 +38,12 @@ namespace Slates.Player
 
         private static Vector2 _antiJitterDistance = new Vector2(0.1f, 0.1f);
 
+        private EscMenu _escMenu = null;
+
         private void Awake()
         {
             _controller = GetComponent<KCC>();
+            _escMenu = GameObject.Find("Esc Menu Canvas").GetComponent<EscMenu>();
             QualitySettings.vSyncCount = 2;
         }
 
@@ -104,7 +107,18 @@ namespace Slates.Player
                 }
 
                 // Handle select/deselect
-                if (data.buttons.WasPressed(PreviousButtons, (int)InputButtons.Select)) { Select(); }
+                if (data.buttons.WasPressed(PreviousButtons, (int)InputButtons.Select))
+                {
+                    Debug.Log("PlayerController.FixedUpdateNetwork: Pressed Select button");
+                    Select();
+                }
+
+                // Handle Escape menu
+                if (data.buttons.WasPressed(PreviousButtons, (int)InputButtons.Escape))
+                {
+                    Debug.Log("PlayerController.FixedUpdateNetwork: Pressed Escape button");
+                    _escMenu.Appear();
+                }
 
                 // Update values
                 PreviousButtons = data.buttons;

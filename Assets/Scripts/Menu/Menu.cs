@@ -6,10 +6,12 @@ public class Menu : MonoBehaviour
 {
     [SerializeField] TMP_InputField lobbyCodeInput;
     private BackgroundInfo _backgroundInfo;
+    private EscMenu _escMenu;
 
     private void Awake()
     {
         _backgroundInfo = GameObject.Find("Background Info").GetComponent<BackgroundInfo>();
+        _escMenu = GameObject.Find("Esc Menu Canvas").GetComponent<EscMenu>();
     }
 
     public void OnJoinButton()
@@ -19,7 +21,7 @@ public class Menu : MonoBehaviour
         {
             _backgroundInfo.SetLobbyCode(lobbyCode);
             _backgroundInfo.SetPlayerMode(Fusion.GameMode.Client);
-            SceneManager.LoadScene(2);
+            SceneManager.LoadScene("Scenes/Puzzles Test Scene");
         }
     }
 
@@ -33,6 +35,6 @@ public class Menu : MonoBehaviour
 
     public void OnQuitButton()
     {
-        Application.Quit();
+        _escMenu.GetComponent<Canvas>().enabled = true;
     }
 }

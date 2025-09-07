@@ -13,7 +13,8 @@ namespace Slates.Networking.Input
                             lookAction,
                             jumpAction,
                             selectAction,
-                            interactAction;
+                            interactAction,
+                            escapeAction;
 
         private NetworkInputData _input;
         private bool _reset = true;
@@ -26,6 +27,7 @@ namespace Slates.Networking.Input
             jumpAction = InputSystem.actions.FindAction("Jump");
             selectAction = InputSystem.actions.FindAction("Select");
             interactAction = InputSystem.actions.FindAction("Interact");
+            escapeAction = InputSystem.actions.FindAction("Escape");
         }
 
         public void BeforeUpdate()
@@ -47,6 +49,7 @@ namespace Slates.Networking.Input
             buttons.Set((int)InputButtons.Jump, jumpAction.IsPressed());
             buttons.Set((int)InputButtons.Select, selectAction.IsPressed());
             buttons.Set((int)InputButtons.Interact, interactAction.IsPressed());
+            buttons.Set((int)InputButtons.Interact, escapeAction.IsPressed());
 
             _input.buttons = new NetworkButtons(_input.buttons.Bits | buttons.Bits);
         }

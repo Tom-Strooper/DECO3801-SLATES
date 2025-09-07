@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -17,8 +16,6 @@ namespace Slates.Networking
         [SerializeField] private Text _lobbyCodeOnHUD;
 
         private BackgroundInfo _backgroundInfo;
-
-        private InputAction hostGameAction, joinGameAction;
 
         private Dictionary<PlayerRef, NetworkObject> _players = new Dictionary<PlayerRef, NetworkObject>();
         private string _lobbyCode;
@@ -55,15 +52,6 @@ namespace Slates.Networking
             NetworkSceneInfo sceneInfo = new NetworkSceneInfo();
             if (scene.IsValid) sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
 
-            if (_playerMode == GameMode.Host)
-            {
-                Debug.Log("Using lobby code: " + _lobbyCode);
-            }
-            else if (_playerMode == GameMode.Client)
-            {
-                Debug.Log("Finding host " + _lobbyCode);
-            }
-
             _lobbyCodeOnHUD.text = "Lobby Code: " + _lobbyCode;
 
             // Start or join (depends on game mode) a game session
@@ -90,7 +78,6 @@ namespace Slates.Networking
         }
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
         {
-            Debug.Log("BasicSpawner: OnPlayerLeft");
             if (_players.ContainsKey(player))
             {
                 // Despawn the player
@@ -125,7 +112,7 @@ namespace Slates.Networking
         public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
         {
             Debug.Log("BasicSpawner.OnShutdown: Connection to host " + _lobbyCode + " failed!");
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene("Scenes/Menu Scenes/KBM Main Menu");
         }
         public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
     }

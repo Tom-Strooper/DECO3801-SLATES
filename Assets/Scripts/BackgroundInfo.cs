@@ -10,10 +10,10 @@ public class BackgroundInfo : MonoBehaviour
 
     private GameMode _playerMode;
 
-    void Awake()
+    private void Awake()
     {
         DontDestroyOnLoad(this.gameObject);
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene("Scenes/Menu Scenes/KBM Main Menu");
     }
 
     public void SetPlayerMode(GameMode mode)
