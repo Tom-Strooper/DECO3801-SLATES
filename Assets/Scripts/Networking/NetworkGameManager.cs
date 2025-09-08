@@ -51,6 +51,10 @@ namespace Slates.Networking
             // Initialise menus
             _mainMenu.gameObject.SetActive(true);
             _pauseMenu.gameObject.SetActive(false);
+
+            // Initialise settings
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = 120;
         }
 
         public void StartGame() => _ = StartGameAsync();

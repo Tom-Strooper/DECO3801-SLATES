@@ -38,7 +38,6 @@ namespace Slates.Player
         private void Awake()
         {
             _controller = GetComponent<KCC>();
-            QualitySettings.vSyncCount = 2;
         }
 
         public override void Spawned()
