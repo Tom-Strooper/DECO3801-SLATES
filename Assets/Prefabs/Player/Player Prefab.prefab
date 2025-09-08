@@ -219,10 +219,10 @@ MonoBehaviour:
     Radius: 0.35
     Height: 1.8
     Extent: 0.035
-    ColliderLayer: 0
+    ColliderLayer: 7
     CollisionLayerMask:
       serializedVersion: 2
-      m_Bits: 1
+      m_Bits: 1153
     Features: -1
     InputAuthorityBehavior: 1
     StateAuthorityBehavior: 0
