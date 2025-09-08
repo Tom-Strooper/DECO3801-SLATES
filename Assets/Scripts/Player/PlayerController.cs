@@ -93,7 +93,7 @@ namespace Slates.Player
 
                 velocity.y = _verticalVelocity;
 
-                _controller.SetKinematicVelocity(velocity);
+                _controller.SetDynamicVelocity(velocity);
 
                 _controller.AddLookRotation(-data.look.y * _sensitivity * Runner.DeltaTime, data.look.x * _sensitivity * Runner.DeltaTime);
                 UpdateCameraRotation();
