@@ -12,16 +12,31 @@ using UnityEngine.SceneManagement;
 
 namespace Slates.Networking
 {
-    [RequireComponent(typeof(NetworkRunner), typeof(RunnerSimulatePhysics3D), typeof(NetworkInputManager))]
+    [
+        RequireComponent(typeof(NetworkRunner)),
+        RequireComponent(typeof(RunnerSimulatePhysics3D)),
+        RequireComponent(typeof(NetworkInputManager)),
+        RequireComponent(typeof(NetworkXRInputManager))
+    ]
     public class NetworkGameManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         private NetworkRunner _runner;
+
+        private NetworkInputManager _input;
+        private NetworkXRInputManager _xrInput;
 
         private InputAction _debugHost, _debugJoin;
 
         private void Awake()
         {
             _runner = GetComponent<NetworkRunner>();
+
+            _input = GetComponent<NetworkInputManager>();
+            _xrInput = GetComponent<NetworkXRInputManager>();
+
+            // Inputs will be enabled upon game start
+            _input.TrackInput = false;
+            _xrInput.TrackInput = false;
 
             _debugHost = InputSystem.actions.FindAction("Host");
             _debugJoin = InputSystem.actions.FindAction("Join");
@@ -37,12 +52,17 @@ namespace Slates.Networking
 
         public void StartGameAsHost()
         {
+            // Enable XR input
+            _xrInput.TrackInput = true;
+
             // TODO - Generate session name/code
             string sessionName = "Test Session";
             _ = StartGame(true, sessionName);
         }
         public void StartGameAsClient(string sessionName)
         {
+            // Enable regular input
+            _input.TrackInput = true;
             _ = StartGame(false, sessionName);
         }
 
@@ -87,11 +107,16 @@ namespace Slates.Networking
             // TODO - Error/feedback reporting (UI)
         }
 
+        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+        {
+            _input.TrackInput = false;
+            _xrInput.TrackInput = false;
+        }
+
         public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
         public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) { }
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
-        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
         public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
         public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
         public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }

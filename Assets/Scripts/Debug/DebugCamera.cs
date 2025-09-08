@@ -14,7 +14,6 @@ namespace Slates.DebugUtils
         [SerializeField] private BookController _book;
         private bool _bookSelected = false;
 
-
         private void Awake()
         {
             _look = InputSystem.actions.FindAction("Look");

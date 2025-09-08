@@ -2,85 +2,77 @@ using System;
 using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
+using Slates.Camera;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Slates.Networking.Input
 {
-    // Implementation based off MultiClimb Tutorial on Photon
-    public class NetworkInputManager : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCallbacks
+    public class NetworkXRInputManager : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCallbacks
     {
         public bool TrackInput { get; set; } = false;
 
         [SerializeField] private InputActionAsset _actions;
 
-        private InputAction _moveAction,
-                            _lookAction,
-                            _jumpAction,
-                            _selectAction,
-                            _interactAction,
-                            _pauseAction;
+        private InputAction _lookAction,
+                            _summonAction,
+                            _grabAction,
+                            _pinchAction;
 
-        private NetworkInputData _input;
+        private NetworkXRInputData _input;
         private bool _reset = true;
+
+        private Transform _rightHand = null;
 
         private void Awake()
         {
-            InputActionMap playerInputActions = _actions.FindActionMap("Player");
+            InputActionMap xrPlayerInputActions = _actions.FindActionMap("XR Player");
 
-            // Bind actions
-            _moveAction = playerInputActions.FindAction("Move");
-            _lookAction = playerInputActions.FindAction("Look");
+            _lookAction = xrPlayerInputActions.FindAction("Look");
 
-            _jumpAction = playerInputActions.FindAction("Jump");
-            _selectAction = playerInputActions.FindAction("Select");
-            _interactAction = playerInputActions.FindAction("Interact");
-
-            _pauseAction = playerInputActions.FindAction("Pause");
+            _summonAction = xrPlayerInputActions.FindAction("Summon");
+            _grabAction = xrPlayerInputActions.FindAction("Grab");
+            _pinchAction = xrPlayerInputActions.FindAction("Pinch");
         }
+
+        public void SetRightHand(Transform rightHand) => _rightHand = rightHand;
 
         public void BeforeUpdate()
         {
             if (_reset)
             {
-                _input = new NetworkInputData();
+                _input = new NetworkXRInputData();
                 _reset = false;
             }
 
-            // Show/hide cursor
-            if (_pauseAction.WasPressedThisFrame())
-            {
-                // TODO - Pause/unpause
-                if (Cursor.lockState == CursorLockMode.Locked)
-                {
-                    Cursor.lockState = CursorLockMode.None;
-                    Cursor.visible = true;
-                }
-                else
-                {
-                    Cursor.lockState = CursorLockMode.Locked;
-                    Cursor.visible = false;
-                }
-            }
-
-            // Only capture input when mouse is locked (i.e., not interacting w/ menus, clicked outside of game, etc)
-            if (Cursor.lockState != CursorLockMode.Locked) return;
-
             NetworkButtons buttons = new NetworkButtons();
 
-            _input.direction += _moveAction.ReadValue<Vector2>();
-            _input.look += _lookAction.ReadValue<Vector2>();
+            if (_rightHand is null)
+            {
+                _input.interactionOrigin = CameraController.Instance.transform.position;
+                _input.interactionDirection = CameraController.Instance.transform.forward;
+            }
+            else
+            {
+                _input.interactionOrigin = _rightHand.position;
+                _input.interactionDirection = _rightHand.forward;
+            }
 
-            buttons.Set((int)InputButtons.Jump, _jumpAction.IsPressed());
-            buttons.Set((int)InputButtons.Select, _selectAction.IsPressed());
-            buttons.Set((int)InputButtons.Interact, _interactAction.IsPressed());
+            _input.look = _lookAction.ReadValue<Vector2>();
+
+            // TODO - Implement this using the XR hand gesture
+            bool isPalmUp = false;
+
+            buttons.Set((int)XRInputButtons.Summon, _summonAction.IsPressed() || isPalmUp);
+            buttons.Set((int)XRInputButtons.Grab, _grabAction.IsPressed());
+            buttons.Set((int)XRInputButtons.Pinch, _pinchAction.IsPressed());
 
             _input.buttons = new NetworkButtons(_input.buttons.Bits | buttons.Bits);
         }
 
         public void OnInput(NetworkRunner runner, NetworkInput input)
         {
-            _input.direction.Normalize();
+            _input.interactionDirection.Normalize();
             _reset = true;
 
             if (!TrackInput) return;
@@ -89,16 +81,9 @@ namespace Slates.Networking.Input
 
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
         {
-            if (runner.LocalPlayer != player) return;
-
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
         }
         public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
         {
-            // Show the cursor after disconnection from server
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
         }
 
         public void OnConnectedToServer(NetworkRunner runner) { }

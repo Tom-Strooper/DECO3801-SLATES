@@ -8,6 +8,9 @@ namespace Slates.Networking
     {
         [Networked, Capacity(Constants.MaxPlayers)] private NetworkDictionary<PlayerRef, NetworkObject> _players { get; } = new NetworkDictionary<PlayerRef, NetworkObject>();
 
+        public Transform VRSpawn => _vrPlayerSpawn;
+        public Transform NonVRSpawn => _nonVrPlayerSpawnOrigin;
+
         [Header("VR Player Settings")]
         [SerializeField] private NetworkPrefabRef _vrPlayerPrefab;
         [SerializeField] private Transform _vrPlayerSpawn;
@@ -23,7 +26,7 @@ namespace Slates.Networking
             if (!HasStateAuthority) return;
 
             // Spawn player (first player to join is VR player)
-            NetworkObject playerObject = _players.Count == 0 ? SpawnNonVrPlayer(player) : SpawnVrPlayer(player);
+            NetworkObject playerObject = _players.Count == 0 ? SpawnVrPlayer(player) : SpawnNonVrPlayer(player);
             _players.Add(player, playerObject);
         }
 

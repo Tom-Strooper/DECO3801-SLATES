@@ -1,6 +1,7 @@
 using Fusion;
 using Fusion.Addons.KCC;
 using Slates.Camera;
+using Slates.Networking;
 using Slates.Networking.Input;
 using Slates.PuzzleInteractions.Controllers;
 using Slates.PuzzleInteractions.Selection;
@@ -96,13 +97,13 @@ namespace Slates.Player
                 // Handle select/deselect
                 if (data.buttons.WasPressed(PreviousButtons, (int)InputButtons.Select)) { Select(); }
 
-                // Update values
+                // Update button values
                 PreviousButtons = data.buttons;
             }
 
             if (transform.position.y < -20.0f)
             {
-                _controller.SetPosition(Vector3.up);
+                _controller.SetPosition(FindAnyObjectByType<NetworkSpawner>().NonVRSpawn.position);
             }
         }
 
@@ -128,8 +129,7 @@ namespace Slates.Player
             }
 
             // Perform a raycast, ignoring the player's rigidbody, to see if the player is selecting anything in range
-            RaycastHit hit;
-            if (!Physics.Raycast(_head.position, _head.forward, out hit, _maxSelectionDistance, _interactionLayerMask.value)) return;
+            if (!CameraController.Instance.Raycast(out RaycastHit hit, _maxSelectionDistance, _interactionLayerMask)) return;
 
             if (hit.collider.attachedRigidbody?.GetComponent<ISelectable>() is not ISelectable selectable) return;
             if (selectable.IsSelected) return;

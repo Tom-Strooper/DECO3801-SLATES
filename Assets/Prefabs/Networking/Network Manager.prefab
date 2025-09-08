@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6176082674369880546}
   - component: {fileID: 8983726712406543234}
   - component: {fileID: 2824720576184894608}
+  - component: {fileID: 904504065433963483}
   m_Layer: 0
   m_Name: Network Manager
   m_TagString: Untagged
@@ -88,3 +89,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee2bf912b13cc854886940f5879a7a76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Slates.Networking.Input.NetworkInputManager
+  _actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+--- !u!114 &904504065433963483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9084999570782632602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0b31f6d2bbdd3546ab230a6b64198db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Slates.Networking.Input.NetworkXRInputManager
+  _actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
