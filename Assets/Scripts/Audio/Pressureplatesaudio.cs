@@ -3,14 +3,14 @@ using Slates.PuzzleInteractions;
 using Slates.PuzzleInteractions.Physics;
 using Fusion;
 
-public class PressurePlate : MonoBehaviour
+public class PressurePlate : NetworkBehaviour
 {
     [Header("Debug Info")]
     [SerializeField] private bool debugMode = true;
 
     private void Awake()
     {
-        // Try to find a TriggerVolume on this object or its children
+        // Hook into TriggerVolume events
         TriggerVolume trigger = GetComponentInChildren<TriggerVolume>();
         if (trigger != null)
         {
@@ -33,20 +33,10 @@ public class PressurePlate : MonoBehaviour
 
         if (ShouldTriggerPlate(other))
         {
-            if (AudioManager.Instance != null)
+            if (Object.HasStateAuthority) // Only server (or state authority) fires the RPC
             {
-                AudioManager.Instance.PlayPlateSound();
-                Debug.Log("Pressure plate triggered by " + other.name + " - Sound should play");
+                RPC_PlayPlateSound();
             }
-            else
-            {
-                Debug.LogError("AudioManager.Instance is NULL!");
-            }
-        }
-        else
-        {
-            if (debugMode)
-                Debug.Log($"Object '{other.name}' did not meet trigger conditions");
         }
     }
 
@@ -58,7 +48,7 @@ public class PressurePlate : MonoBehaviour
 
     private bool ShouldTriggerPlate(Collider other)
     {
-        // 1️⃣ Check if it has a PhysicsInteractorComponent (common in Fusion KCC colliders)
+        // Detect Fusion PhysicsInteractor objects
         if (other.attachedRigidbody?.GetComponent<PhysicsInteractorComponent>() != null)
         {
             if (debugMode)
@@ -66,7 +56,7 @@ public class PressurePlate : MonoBehaviour
             return true;
         }
 
-        // 2️⃣ Optional: Check if the parent has a NetworkObject with input authority
+        // Detect player roots
         NetworkObject playerRoot = other.GetComponentInParent<NetworkObject>();
         if (playerRoot != null && playerRoot.HasInputAuthority)
         {
@@ -75,6 +65,21 @@ public class PressurePlate : MonoBehaviour
             return true;
         }
 
-        return false; // Ignore anything else
+        return false;
+    }
+
+    // 🔊 This RPC is broadcast to everyone
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_PlayPlateSound()
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayPlateSound();
+            Debug.Log("Pressure plate sound played universally");
+        }
+        else
+        {
+            Debug.LogError("AudioManager.Instance is NULL!");
+        }
     }
 }
