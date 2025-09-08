@@ -21,8 +21,6 @@ namespace Slates.Player
         [SerializeField] private Transform _head;
         [SerializeField] private float _sensitivity = 50.0f;
 
-        private float _xRotation = 0.0f;
-
         [Header("Movement Settings")]
         [SerializeField] private float _gravity = 20.0f;
         [SerializeField] private float _maxMovementSpeed = 10.0f;
@@ -97,12 +95,7 @@ namespace Slates.Player
 
                 _controller.SetKinematicVelocity(velocity);
 
-                // TODO - Fix camera jitter
-                _controller.AddLookRotation(0.0f, data.look.x * _sensitivity * Runner.DeltaTime);
-
-                _xRotation -= data.look.y * _sensitivity * Runner.DeltaTime;
-                _xRotation = Mathf.Clamp(_xRotation, -80.0f, 85.0f);
-
+                _controller.AddLookRotation(-data.look.y * _sensitivity * Runner.DeltaTime, data.look.x * _sensitivity * Runner.DeltaTime);
                 UpdateCameraRotation();
 
                 // Update positioning of held object
@@ -133,7 +126,7 @@ namespace Slates.Player
 
         private void UpdateCameraRotation()
         {
-            _head.transform.localRotation = Quaternion.Euler(_xRotation, 0.0f, 0.0f);
+            _head.transform.localRotation = Quaternion.Euler(_controller.GetLookRotation().x, 0.0f, 0.0f);
         }
 
         private void Select()

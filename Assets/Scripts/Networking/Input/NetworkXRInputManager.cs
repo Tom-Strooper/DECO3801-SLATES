@@ -83,7 +83,11 @@ namespace Slates.Networking.Input
             _reset = true;
 
             if (!TrackInput) return;
+
             input.Set(_input);
+
+            // Prevent camera sensitivity issues
+            _input.look = Vector2.zero;
         }
 
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)

@@ -224,10 +224,10 @@ MonoBehaviour:
       serializedVersion: 2
       m_Bits: 1
     Features: -1
-    InputAuthorityBehavior: 0
+    InputAuthorityBehavior: 1
     StateAuthorityBehavior: 0
     ProxyInterpolationMode: 0
-    ForcePredictedLookRotation: 0
+    ForcePredictedLookRotation: 1
     AllowClientTeleports: 0
     Processors: []
     MaxPenetrationSteps: 8

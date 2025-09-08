@@ -68,7 +68,11 @@ namespace Slates.Networking.Input
             _reset = true;
 
             if (!TrackInput) return;
+
             input.Set(_input);
+
+            // Prevents camera sway & abrupt sensitivity changes
+            _input.look = Vector2.zero;
         }
 
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
