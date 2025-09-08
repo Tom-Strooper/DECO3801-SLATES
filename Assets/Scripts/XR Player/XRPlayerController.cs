@@ -1,8 +1,8 @@
 using UnityEngine;
 using Fusion;
 using Slates.Camera;
-using Slates.PuzzleInteractions.Controllers;
 using Slates.Networking.Input;
+using Slates.Book;
 
 namespace Slates.XRPlayer
 {

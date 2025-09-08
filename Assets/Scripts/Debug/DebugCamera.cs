@@ -1,4 +1,4 @@
-using Slates.PuzzleInteractions.Controllers;
+using Slates.Book;
 using UnityEngine;
 using UnityEngine.InputSystem;
 

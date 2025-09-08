@@ -35,6 +35,7 @@ namespace Slates.Networking.Input
             _pinchAction = xrPlayerInputActions.FindAction("Pinch");
         }
 
+        // TODO - Call this method, so that the right hand transform tracks the right hand of the VR player
         public void SetRightHand(Transform rightHand) => _rightHand = rightHand;
 
         public void BeforeUpdate()

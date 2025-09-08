@@ -1,11 +1,12 @@
 using System;
+using Slates.Book.Pages;
 using UnityEngine;
 
-namespace Slates.PuzzleInteractions.Controllers
+namespace Slates.Book
 {
     public class BookController : MonoBehaviour
     {
-        private const float MoveAngleThreshold = 1.0f * Mathf.Deg2Rad;
+        private const float MoveAngleThreshold = 2.0f * Mathf.Deg2Rad;
 
         [Header("Transform References")]
         [SerializeField, Tooltip("Point at the base of the spine of the book")] private Transform _spine;
@@ -23,20 +24,24 @@ namespace Slates.PuzzleInteractions.Controllers
         private float MaxAngleLeft => Mathf.Atan2(Vector3.Dot(SpineLeft, _spine.forward), Vector3.Dot(SpineLeft, _spine.right));
         private float MaxAngleRight => Mathf.Atan2(Vector3.Dot(SpineRight, _spine.forward), Vector3.Dot(SpineRight, _spine.right));
 
-        [Header("Renderer References")]
-        [SerializeField] private Renderer _left;
-        [SerializeField] private Renderer _leftPageLeft;
-        [SerializeField] private Renderer _leftPageRight;
-        [SerializeField] private Renderer _rightPageLeft;
-        [SerializeField] private Renderer _rightPageRight;
-        [SerializeField] private Renderer _right;
+        [Header("Page UI References")]
+        [SerializeField] private Canvas _leftPage;
+        [SerializeField] private Canvas _leftFoldingPageLeft;
+        [SerializeField] private Canvas _leftFoldingPageRight;
+        [SerializeField] private Canvas _rightFoldingPageLeft;
+        [SerializeField] private Canvas _rightFoldingPageRight;
+        [SerializeField] private Canvas _rightPage;
 
-        [Header("Page Textures")]
-        [SerializeField] private Texture2D _blankPageTexture;
-        [SerializeField] private Texture2D[] _pages;
+        private PageController _leftPageController = null;
+        private PageController _leftFoldingPageLeftController = null;
+        private PageController _leftFoldingPageRightController = null;
+        private PageController _rightFoldingPageLeftController = null;
+        private PageController _rightFoldingPageRightController = null;
+        private PageController _rightPageController = null;
 
-        [Header("Page UIs")]
-        [SerializeField] private GameObject[] _pageUIs;
+        [Header("Pages")]
+        [SerializeField] private GameObject _blankPage;
+        [SerializeField] private GameObject[] _pages;
 
         [Header("Animation Settings")]
         [SerializeField, Range(0.0f, 720.0f)] private float _autoTurnAngularSpeed;
@@ -185,17 +190,54 @@ namespace Slates.PuzzleInteractions.Controllers
 
         private void UpdateVisuals()
         {
-            _left.material.mainTexture = Page(_leftIndex - 2);
-            _leftPageLeft.material.mainTexture = Page(_leftIndex - 1);
-            _leftPageLeft.material.mainTexture = Page(_leftIndex - 1);
+            ClearUIs();
 
-            _leftPageRight.material.mainTexture = Page(_leftIndex);
-            _rightPageLeft.material.mainTexture = Page(_leftIndex + 1);
+            _leftPageController = Instantiate(Page(_leftIndex - 2), _leftPage.transform).GetComponent<PageController>();
+            _leftFoldingPageLeftController = Instantiate(Page(_leftIndex - 1), _leftFoldingPageLeft.transform).GetComponent<PageController>();
+            _leftFoldingPageRightController = Instantiate(Page(_leftIndex), _leftFoldingPageRight.transform).GetComponent<PageController>();
+            _rightFoldingPageLeftController = Instantiate(Page(_leftIndex + 1), _rightFoldingPageLeft.transform).GetComponent<PageController>();
+            _rightFoldingPageRightController = Instantiate(Page(_leftIndex + 2), _rightFoldingPageRight.transform).GetComponent<PageController>();
+            _rightPageController = Instantiate(Page(_leftIndex + 3), _rightPage.transform).GetComponent<PageController>();
 
-            _rightPageRight.material.mainTexture = Page(_leftIndex + 2);
-            _right.material.mainTexture = Page(_leftIndex + 3);
-
-            // TODO - Spawn/Despawn Page UI Elements
+            _leftPageController.Initialise();
+            _leftFoldingPageLeftController.Initialise();
+            _leftFoldingPageRightController.Initialise();
+            _rightFoldingPageLeftController.Initialise();
+            _rightFoldingPageRightController.Initialise();
+            _rightPageController.Initialise();
+        }
+        private void ClearUIs()
+        {
+            if (_leftPageController is not null)
+            {
+                Destroy(_leftPageController.gameObject);
+                _leftPageController = null;
+            }
+            if (_leftFoldingPageLeftController is not null)
+            {
+                Destroy(_leftFoldingPageLeftController.gameObject);
+                _leftFoldingPageLeftController = null;
+            }
+            if (_leftFoldingPageRightController is not null)
+            {
+                Destroy(_leftFoldingPageRightController.gameObject);
+                _leftFoldingPageRightController = null;
+            }
+            if (_rightFoldingPageLeftController is not null)
+            {
+                Destroy(_rightFoldingPageLeftController.gameObject);
+                _rightFoldingPageLeftController = null;
+            }
+            if (_rightFoldingPageRightController is not null)
+            {
+                Destroy(_rightFoldingPageRightController.gameObject);
+                _rightFoldingPageRightController = null;
+            }
+            if (_rightPageController is not null)
+            {
+                Destroy(_rightPageController.gameObject);
+                _rightPageController = null;
+            }
         }
 
         private int LastLeftPageIndex => _pages.Length - (_pages.Length % 2);
@@ -209,15 +251,10 @@ namespace Slates.PuzzleInteractions.Controllers
         private float LeftProgress(Vector3 point) => Mathf.Clamp01(Vector3.Dot(point - _dragStartPoint, BookRight)
                                                                  / Vector3.Dot(_rightSideCorner.position - _dragStartPoint, BookRight));
 
-        private Texture2D Page(int index)
+        private GameObject Page(int index)
         {
-            if (_pages is null || index < 0 || index >= _pages.Length) return _blankPageTexture;
-            return _pages[index] ?? _blankPageTexture;
-        }
-        private GameObject PageUI(int index)
-        {
-            if (_pageUIs is null || index < 0 || index >= _pageUIs.Length) return null;
-            return _pageUIs[index];
+            if (_pages is null || index < 0 || index >= _pages.Length) return _blankPage;
+            return _pages[index] ?? _blankPage;
         }
     }
 
