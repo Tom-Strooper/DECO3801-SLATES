@@ -27,4 +27,9 @@ public class EscMenu : MonoBehaviour
     {
         this.GetComponent<Canvas>().enabled = true;
     }
+
+    public bool IsEnabled()
+    {
+        return this.GetComponent<Canvas>().enabled;
+    }
 }

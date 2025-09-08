@@ -111,7 +111,6 @@ namespace Slates.Networking
         public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
         public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
         {
-            Debug.Log("BasicSpawner.OnShutdown: Connection to host " + _lobbyCode + " failed!");
             SceneManager.LoadScene("Scenes/Menu Scenes/KBM Main Menu");
         }
         public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
