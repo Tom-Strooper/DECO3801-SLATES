@@ -11,7 +11,7 @@ namespace Slates.Book.Pages
         public override void Initialise()
         {
             base.Initialise();
-            _code.text = FindAnyObjectByType<NetworkSpawner>()?.Info?.LobbyCode ?? "######";
+            _code.text = NetworkGameManager.Instance.Info.LobbyCode ?? "######";
         }
     }
 }

@@ -5,9 +5,9 @@ using Fusion;
 using Fusion.Addons.Physics;
 using Fusion.Sockets;
 using Slates.Networking.Input;
+using Slates.UI;
 using Slates.Utility;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 namespace Slates.Networking
@@ -20,15 +20,25 @@ namespace Slates.Networking
     ]
     public class NetworkGameManager : MonoBehaviour, INetworkRunnerCallbacks
     {
+        public static NetworkGameManager Instance { get; private set; } = null;
+
+        public BackgroundInfo Info { get; } = new BackgroundInfo();
+
+        public bool IsPaused { get; private set; } = false;
+
         private NetworkRunner _runner;
 
         private NetworkInputManager _input;
         private NetworkXRInputManager _xrInput;
 
-        private InputAction _debugHost, _debugJoin;
+        [SerializeField] private Menu _mainMenu;
+        [SerializeField] private PauseMenu _pauseMenu;
 
         private void Awake()
         {
+            if (Instance is null) Instance = this;
+            else Destroy(gameObject);
+
             _runner = GetComponent<NetworkRunner>();
 
             _input = GetComponent<NetworkInputManager>();
@@ -38,35 +48,13 @@ namespace Slates.Networking
             _input.TrackInput = false;
             _xrInput.TrackInput = false;
 
-            _debugHost = InputSystem.actions.FindAction("Host");
-            _debugJoin = InputSystem.actions.FindAction("Join");
+            // Initialise menus
+            _mainMenu.gameObject.SetActive(true);
+            _pauseMenu.gameObject.SetActive(false);
         }
 
-        private void Update()
-        {
-            if (_runner.IsRunning) return;
-
-            if (_debugHost.WasPressedThisFrame()) StartGameAsHost();
-            else if (_debugJoin.WasPressedThisFrame()) StartGameAsClient("Test Session");
-        }
-
-        public void StartGameAsHost()
-        {
-            // Enable XR input
-            _xrInput.TrackInput = true;
-
-            // TODO - Generate session name/code
-            string sessionName = "Test Session";
-            _ = StartGame(true, sessionName);
-        }
-        public void StartGameAsClient(string sessionName)
-        {
-            // Enable regular input
-            _input.TrackInput = true;
-            _ = StartGame(false, sessionName);
-        }
-
-        private async Task StartGame(bool asHost, string sessionName)
+        public void StartGame() => _ = StartGameAsync();
+        private async Task StartGameAsync()
         {
             _runner.ProvideInput = true;
 
@@ -77,40 +65,54 @@ namespace Slates.Networking
             if (!scene.IsValid)
             {
                 // We could not load the scene, so exit from the start game method
-                Debug.Log("Scene reference invalid, destroying network runner!");
+                Debug.Log("Scene reference invalid!");
                 return;
             }
 
             info.AddSceneRef(scene);
 
+            // Enable the appropriate input
+            if (Info.PlayerMode == GameMode.Host) _xrInput.TrackInput = true;
+            else _input.TrackInput = true;
+
             // Finally, start the game
             StartGameArgs args = new StartGameArgs();
 
-            args.GameMode = asHost ? GameMode.Host : GameMode.Client;
-            args.SessionName = sessionName;
+            args.GameMode = Info.PlayerMode;
+            args.SessionName = Info.LobbyCode;
+            args.PlayerCount = Constants.MaxPlayers;
             args.Scene = scene;
             args.SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
 
-            if (asHost)
-            {
-                args.PlayerCount = Constants.MaxPlayers;
-            }
-
             StartGameResult result = await _runner.StartGame(args);
-            Debug.Log(result);
+
             if (result.Ok)
             {
-                // TODO - Hide main menu
+                _mainMenu.gameObject.SetActive(false);
                 return;
             }
 
             // TODO - Error/feedback reporting (UI)
         }
 
+        public void PauseGame()
+        {
+            _pauseMenu.gameObject.SetActive(true);
+        }
+        public void UnpauseGame()
+        {
+            _pauseMenu.gameObject.SetActive(true);
+        }
+
+        public void QuitGame() => Application.Quit();
+
         public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
         {
             _input.TrackInput = false;
             _xrInput.TrackInput = false;
+
+            // Show main menu
+            _mainMenu.gameObject.SetActive(true);
         }
 
         public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }

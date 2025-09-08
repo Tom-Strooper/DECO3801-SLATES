@@ -56,7 +56,7 @@ namespace Slates.Book
 
         private int _leftIndex = 0;
 
-        private void Start()
+        private void OnEnable()
         {
             // Initialise page visuals
             UpdateVisuals();

@@ -3,6 +3,7 @@ using Fusion;
 using Slates.Camera;
 using Slates.Networking.Input;
 using Slates.Book;
+using Slates.Networking;
 
 namespace Slates.XRPlayer
 {
@@ -32,6 +33,8 @@ namespace Slates.XRPlayer
 
             _book = FindAnyObjectByType<BookController>();
             CameraController.Instance.BindToHead(_head);
+
+            _book.gameObject.SetActive(false);
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -45,6 +48,25 @@ namespace Slates.XRPlayer
             {
                 // Prevent wild input by normalising
                 data.interactionDirection.Normalize();
+
+                // Pause/unpause (TODO - in VR this likely needs to be different)
+                if (data.buttons.WasPressed(PreviousButtons, (int)XRInputButtons.Pause))
+                {
+                    if (NetworkGameManager.Instance.IsPaused)
+                    {
+                        Cursor.lockState = CursorLockMode.None;
+                        Cursor.visible = true;
+
+                        NetworkGameManager.Instance.UnpauseGame();
+                    }
+                    else
+                    {
+                        Cursor.lockState = CursorLockMode.Locked;
+                        Cursor.visible = false;
+
+                        NetworkGameManager.Instance.PauseGame();
+                    }
+                }
 
                 // TODO - Skip this camera rotation information if in VR - and use VR tracking to update camera position
                 transform.Rotate(Vector3.up * data.look.x * _sensitivity * Runner.DeltaTime);
@@ -81,22 +103,26 @@ namespace Slates.XRPlayer
                     {
                         if (Physics.Raycast(data.interactionOrigin, data.interactionDirection, out hit, InteractionDistance))
                         {
-                            if (hit.collider?.GetComponentInParent<BookController>() is not BookController book) return;
-                            if (book != _book || !_book.CanBeginPageTurn) return;
-
-                            _bookSelected = _book.StartDrag(hit.point);
+                            if (hit.collider?.GetComponentInParent<BookController>() is BookController book)
+                            {
+                                if (book == _book && _book.CanBeginPageTurn)
+                                {
+                                    _bookSelected = _book.StartDrag(hit.point);
+                                }
+                            }
                         }
                     }
                 }
                 else if (data.buttons.WasReleased(PreviousButtons, (int)XRInputButtons.Pinch))
                 {
-                    if (!_bookSelected) return;
+                    if (_bookSelected)
+                    {
+                        // End the page turn
+                        if (Physics.Raycast(data.interactionOrigin, data.interactionDirection, out hit, InteractionDistance)) _book.EndDrag(hit.point);
+                        else _book.EndDrag(data.interactionOrigin + data.interactionDirection * InteractionDistance);
 
-                    // End the page turn
-                    if (Physics.Raycast(data.interactionOrigin, data.interactionDirection, out hit, InteractionDistance)) _book.EndDrag(hit.point);
-                    else _book.EndDrag(data.interactionOrigin + data.interactionDirection * InteractionDistance);
-
-                    _bookSelected = false;
+                        _bookSelected = false;
+                    }
                 }
 
                 // Update button values

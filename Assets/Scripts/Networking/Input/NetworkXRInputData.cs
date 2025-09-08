@@ -8,6 +8,7 @@ namespace Slates.Networking.Input
         Summon,
         Grab,
         Pinch,
+        Pause,
     }
 
     public struct NetworkXRInputData : INetworkInput

@@ -17,7 +17,8 @@ namespace Slates.Networking.Input
         private InputAction _lookAction,
                             _summonAction,
                             _grabAction,
-                            _pinchAction;
+                            _pinchAction,
+                            _pauseAction;
 
         private NetworkXRInputData _input;
         private bool _reset = true;
@@ -33,6 +34,8 @@ namespace Slates.Networking.Input
             _summonAction = xrPlayerInputActions.FindAction("Summon");
             _grabAction = xrPlayerInputActions.FindAction("Grab");
             _pinchAction = xrPlayerInputActions.FindAction("Pinch");
+
+            _pauseAction = xrPlayerInputActions.FindAction("Pause");
         }
 
         // TODO - Call this method, so that the right hand transform tracks the right hand of the VR player
@@ -45,6 +48,8 @@ namespace Slates.Networking.Input
                 _input = new NetworkXRInputData();
                 _reset = false;
             }
+
+            if (Cursor.lockState == CursorLockMode.None) return;
 
             NetworkButtons buttons = new NetworkButtons();
 
@@ -67,6 +72,7 @@ namespace Slates.Networking.Input
             buttons.Set((int)XRInputButtons.Summon, _summonAction.IsPressed() || isPalmUp);
             buttons.Set((int)XRInputButtons.Grab, _grabAction.IsPressed());
             buttons.Set((int)XRInputButtons.Pinch, _pinchAction.IsPressed());
+            buttons.Set((int)XRInputButtons.Pause, _pauseAction.IsPressed());
 
             _input.buttons = new NetworkButtons(_input.buttons.Bits | buttons.Bits);
         }

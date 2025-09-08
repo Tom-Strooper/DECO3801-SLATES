@@ -47,23 +47,9 @@ namespace Slates.Networking.Input
                 _reset = false;
             }
 
-            // Show/hide cursor
-            if (_pauseAction.WasPressedThisFrame())
-            {
-                // TODO - Pause/unpause
-                if (Cursor.lockState == CursorLockMode.Locked)
-                {
-                    Cursor.lockState = CursorLockMode.None;
-                    Cursor.visible = true;
-                }
-                else
-                {
-                    Cursor.lockState = CursorLockMode.Locked;
-                    Cursor.visible = false;
-                }
-            }
-
             // Only capture input when mouse is locked (i.e., not interacting w/ menus, clicked outside of game, etc)
+            if (Cursor.lockState == CursorLockMode.None) return;
+
             NetworkButtons buttons = new NetworkButtons();
 
             _input.direction += _moveAction.ReadValue<Vector2>();

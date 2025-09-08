@@ -6,12 +6,12 @@ namespace Slates.Networking
 {
     public class NetworkSpawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
     {
+        public static NetworkSpawner Instance { get; private set; } = null;
+
         [Networked, Capacity(Constants.MaxPlayers)] private NetworkDictionary<PlayerRef, NetworkObject> _players { get; } = new NetworkDictionary<PlayerRef, NetworkObject>();
 
         public Transform VRSpawn => _vrPlayerSpawn;
         public Transform NonVRSpawn => _nonVrPlayerSpawnOrigin;
-
-        public BackgroundInfo Info { get; private set; }
 
         [Header("VR Player Settings")]
         [SerializeField] private NetworkPrefabRef _vrPlayerPrefab;
@@ -21,6 +21,12 @@ namespace Slates.Networking
         [SerializeField] private NetworkPrefabRef _nonVrPlayerPrefab;
         [SerializeField] private Transform _nonVrPlayerSpawnOrigin;
         [SerializeField] private float _nonVrPlayerSpawnRadius = 4.0f;
+
+        private void Awake()
+        {
+            if (Instance is null) Instance = this;
+            else Destroy(gameObject);
+        }
 
         public void PlayerJoined(PlayerRef player)
         {
