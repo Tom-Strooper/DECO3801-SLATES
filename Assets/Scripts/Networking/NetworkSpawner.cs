@@ -26,6 +26,7 @@ namespace Slates.Networking
             if (!HasStateAuthority) return;
 
             // Spawn player (first player to join is VR player)
+            // TODO - This probably needs to be cleverer at detecting host/client
             NetworkObject playerObject = _players.Count == 0 ? SpawnVrPlayer(player) : SpawnNonVrPlayer(player);
             _players.Add(player, playerObject);
         }
