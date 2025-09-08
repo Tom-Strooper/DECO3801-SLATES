@@ -1,3 +1,4 @@
+using Slates.Networking;
 using TMPro;
 using UnityEngine;
 
@@ -10,9 +11,7 @@ namespace Slates.Book.Pages
         public override void Initialise()
         {
             base.Initialise();
-
-            // TODO - Integrate w/ actual code
-            _code.text = "######";
+            _code.text = FindAnyObjectByType<NetworkSpawner>()?.Info?.LobbyCode ?? "######";
         }
     }
 }

@@ -37,10 +37,14 @@ namespace Slates.Player
 
         private ISelectable _held = null;
 
+        private EscMenu _escMenu = null;
+
         private void Awake()
         {
             _controller = GetComponent<KCC>();
             QualitySettings.vSyncCount = 2;
+
+            _escMenu = GameObject.Find("Esc Menu Canvas").GetComponent<EscMenu>();
         }
 
         public override void Spawned()
@@ -61,6 +65,34 @@ namespace Slates.Player
         {
             if (GetInput(out NetworkInputData data))
             {
+                // Handle Escape menu
+                if (data.buttons.WasPressed(PreviousButtons, (int)InputButtons.Pause))
+                {
+                    if (_escMenu.IsEnabled())
+                    {
+                        // lock camera, hide mouse, menu disappears
+                        Cursor.lockState = CursorLockMode.Locked;
+                        Cursor.visible = false;
+                        _escMenu.Disappear();
+                    }
+                    else
+                    {
+                        // release camera, visible mouse, menu appears
+                        // no change to other data inputs, since only escapeAction can be registered while cursor isn't locked
+                        Cursor.lockState = CursorLockMode.Confined;
+                        Cursor.visible = true;
+                        _escMenu.Appear();
+                    }
+                }
+
+                if (!_escMenu.IsEnabled() && Cursor.visible)
+                {
+                    // player closed the escape menu with button instead of key press
+                    // lock the camera and hide the mouse
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                }
+
                 // Normalise direction to prevent wild movement input
                 data.direction.Normalize();
 

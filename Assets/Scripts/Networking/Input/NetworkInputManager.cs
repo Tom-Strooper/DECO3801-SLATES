@@ -64,8 +64,6 @@ namespace Slates.Networking.Input
             }
 
             // Only capture input when mouse is locked (i.e., not interacting w/ menus, clicked outside of game, etc)
-            if (Cursor.lockState != CursorLockMode.Locked) return;
-
             NetworkButtons buttons = new NetworkButtons();
 
             _input.direction += _moveAction.ReadValue<Vector2>();

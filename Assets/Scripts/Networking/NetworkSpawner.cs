@@ -11,6 +11,8 @@ namespace Slates.Networking
         public Transform VRSpawn => _vrPlayerSpawn;
         public Transform NonVRSpawn => _nonVrPlayerSpawnOrigin;
 
+        public BackgroundInfo Info { get; private set; }
+
         [Header("VR Player Settings")]
         [SerializeField] private NetworkPrefabRef _vrPlayerPrefab;
         [SerializeField] private Transform _vrPlayerSpawn;
