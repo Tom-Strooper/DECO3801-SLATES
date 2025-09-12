@@ -8,9 +8,12 @@ public class PressurePlate : NetworkBehaviour
     [Header("Debug Info")]
     [SerializeField] private bool debugMode = true;
 
+    //Tracks activation
+    [Networked] private bool HasActivated { get; set; } = false;
+
+    private bool localActivated = false;
     private void Awake()
     {
-        // Hook into TriggerVolume events
         TriggerVolume trigger = GetComponentInChildren<TriggerVolume>();
         if (trigger != null)
         {
@@ -33,8 +36,12 @@ public class PressurePlate : NetworkBehaviour
 
         if (ShouldTriggerPlate(other))
         {
-            if (Object.HasStateAuthority) // Only server (or state authority) fires the RPC
+            if (localActivated) return;
+    
+            if (Object.HasStateAuthority && !HasActivated)
             {
+                HasActivated = true;
+                localActivated = true;
                 RPC_PlayPlateSound();
             }
         }
@@ -47,8 +54,7 @@ public class PressurePlate : NetworkBehaviour
     }
 
     private bool ShouldTriggerPlate(Collider other)
-    {
-        // Detect Fusion PhysicsInteractor objects
+    {   
         if (other.attachedRigidbody?.GetComponent<PhysicsInteractorComponent>() != null)
         {
             if (debugMode)
@@ -56,7 +62,6 @@ public class PressurePlate : NetworkBehaviour
             return true;
         }
 
-        // Detect player roots
         NetworkObject playerRoot = other.GetComponentInParent<NetworkObject>();
         if (playerRoot != null && playerRoot.HasInputAuthority)
         {
@@ -68,14 +73,14 @@ public class PressurePlate : NetworkBehaviour
         return false;
     }
 
-    // 🔊 This RPC is broadcast to everyone
+    // Broadcast to everyone
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     private void RPC_PlayPlateSound()
     {
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayPlateSound();
-            Debug.Log("Pressure plate sound played universally");
+            Debug.Log("Pressure plate sound played universally (first activation)");
         }
         else
         {
