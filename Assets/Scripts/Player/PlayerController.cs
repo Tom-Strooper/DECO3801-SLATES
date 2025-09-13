@@ -63,18 +63,25 @@ namespace Slates.Player
                 {
                     if (NetworkGameManager.Instance.IsPaused)
                     {
-                        Cursor.lockState = CursorLockMode.None;
-                        Cursor.visible = true;
+                        Cursor.lockState = CursorLockMode.Locked;
+                        Cursor.visible = false;
 
                         NetworkGameManager.Instance.UnpauseGame();
                     }
                     else
                     {
-                        Cursor.lockState = CursorLockMode.Locked;
-                        Cursor.visible = false;
+                        Cursor.lockState = CursorLockMode.Confined;
+                        Cursor.visible = true;
 
                         NetworkGameManager.Instance.PauseGame();
                     }
+                }
+                else if (!NetworkGameManager.Instance.IsPaused && Cursor.visible)
+                {
+                    // pause menu was dismissed using button and not key press
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                    NetworkGameManager.Instance.UnpauseGame();
                 }
 
                 // Normalise direction to prevent wild movement input

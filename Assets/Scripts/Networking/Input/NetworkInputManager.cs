@@ -48,16 +48,23 @@ namespace Slates.Networking.Input
             }
 
             // Only capture input when mouse is locked (i.e., not interacting w/ menus, clicked outside of game, etc)
-            if (Cursor.lockState == CursorLockMode.None) return;
-
             NetworkButtons buttons = new NetworkButtons();
+            if (Cursor.lockState != CursorLockMode.Locked)
+            {
+                // if mouse is not locked, we still want to capture Escape input to be able to close escape canvas
+                buttons.Set((int)InputButtons.Pause, _pauseAction.IsPressed());
+            }
+            else
+            {
+                // capture all
+                _input.direction += _moveAction.ReadValue<Vector2>();
+                _input.look += _lookAction.ReadValue<Vector2>();
 
-            _input.direction += _moveAction.ReadValue<Vector2>();
-            _input.look += _lookAction.ReadValue<Vector2>();
-
-            buttons.Set((int)InputButtons.Jump, _jumpAction.IsPressed());
-            buttons.Set((int)InputButtons.Select, _selectAction.IsPressed());
-            buttons.Set((int)InputButtons.Interact, _interactAction.IsPressed());
+                buttons.Set((int)InputButtons.Jump, _jumpAction.IsPressed());
+                buttons.Set((int)InputButtons.Select, _selectAction.IsPressed());
+                buttons.Set((int)InputButtons.Interact, _interactAction.IsPressed());
+                buttons.Set((int)InputButtons.Pause, _pauseAction.IsPressed());
+            }
 
             _input.buttons = new NetworkButtons(_input.buttons.Bits | buttons.Bits);
         }

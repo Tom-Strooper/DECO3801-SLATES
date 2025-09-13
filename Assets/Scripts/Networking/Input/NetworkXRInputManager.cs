@@ -49,30 +49,37 @@ namespace Slates.Networking.Input
                 _reset = false;
             }
 
-            if (Cursor.lockState == CursorLockMode.None) return;
-
+            // Only capture input when mouse is locked (i.e., not interacting w/ menus, clicked outside of game, etc)
             NetworkButtons buttons = new NetworkButtons();
-
-            if (_rightHand is null)
+            if (Cursor.lockState != CursorLockMode.Locked)
             {
-                _input.interactionOrigin = CameraController.Instance.transform.position;
-                _input.interactionDirection = CameraController.Instance.transform.forward;
+                // if mouse is not locked, we still want to capture Escape input to be able to close escape canvas
+                buttons.Set((int)InputButtons.Pause, _pauseAction.IsPressed());
             }
             else
             {
-                _input.interactionOrigin = _rightHand.position;
-                _input.interactionDirection = _rightHand.forward;
+                // capture all
+                if (_rightHand is null)
+                {
+                    _input.interactionOrigin = CameraController.Instance.transform.position;
+                    _input.interactionDirection = CameraController.Instance.transform.forward;
+                }
+                else
+                {
+                    _input.interactionOrigin = _rightHand.position;
+                    _input.interactionDirection = _rightHand.forward;
+                }
+
+                _input.look = _lookAction.ReadValue<Vector2>();
+
+                // TODO - Implement this using the XR hand gesture
+                bool isPalmUp = false;
+
+                buttons.Set((int)XRInputButtons.Summon, _summonAction.IsPressed() || isPalmUp);
+                buttons.Set((int)XRInputButtons.Grab, _grabAction.IsPressed());
+                buttons.Set((int)XRInputButtons.Pinch, _pinchAction.IsPressed());
+                buttons.Set((int)XRInputButtons.Pause, _pauseAction.IsPressed());
             }
-
-            _input.look = _lookAction.ReadValue<Vector2>();
-
-            // TODO - Implement this using the XR hand gesture
-            bool isPalmUp = false;
-
-            buttons.Set((int)XRInputButtons.Summon, _summonAction.IsPressed() || isPalmUp);
-            buttons.Set((int)XRInputButtons.Grab, _grabAction.IsPressed());
-            buttons.Set((int)XRInputButtons.Pinch, _pinchAction.IsPressed());
-            buttons.Set((int)XRInputButtons.Pause, _pauseAction.IsPressed());
 
             _input.buttons = new NetworkButtons(_input.buttons.Bits | buttons.Bits);
         }

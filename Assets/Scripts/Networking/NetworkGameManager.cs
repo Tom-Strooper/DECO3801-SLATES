@@ -101,11 +101,13 @@ namespace Slates.Networking
 
         public void PauseGame()
         {
+            IsPaused = true;
             _pauseMenu.gameObject.SetActive(true);
         }
         public void UnpauseGame()
         {
-            _pauseMenu.gameObject.SetActive(true);
+            IsPaused = false;
+            _pauseMenu.gameObject.SetActive(false);
         }
 
         public void QuitGame() => Application.Quit();
