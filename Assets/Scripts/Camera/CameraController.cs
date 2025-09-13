@@ -30,5 +30,22 @@ namespace Slates.Camera
             // Parent the camera to the root transform of the scene
             transform.SetParent(head.root);
         }
+
+        public bool Raycast(out RaycastHit hit, float distance, LayerMask? mask = null)
+        {
+            if (mask is null) return Physics.Raycast(transform.position, transform.forward, out hit, distance);
+            return Physics.Raycast(transform.position, transform.forward, out hit, distance, (LayerMask)mask);
+        }
+        public Vector3 RaycastPoint(float distance, LayerMask? mask = null)
+        {
+            if (Raycast(out RaycastHit hit, distance, mask))
+            {
+                return hit.point;
+            }
+            else
+            {
+                return transform.position + transform.forward * distance;
+            }
+        }
     }
 }

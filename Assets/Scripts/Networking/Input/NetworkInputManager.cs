@@ -7,25 +7,36 @@ using UnityEngine.InputSystem;
 
 namespace Slates.Networking.Input
 {
+    // Implementation based off MultiClimb Tutorial on Photon
     public class NetworkInputManager : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCallbacks
     {
-        private InputAction moveAction,
-                            lookAction,
-                            jumpAction,
-                            selectAction,
-                            interactAction;
+        public bool TrackInput { get; set; } = false;
+
+        [SerializeField] private InputActionAsset _actions;
+
+        private InputAction _moveAction,
+                            _lookAction,
+                            _jumpAction,
+                            _selectAction,
+                            _interactAction,
+                            _pauseAction;
 
         private NetworkInputData _input;
         private bool _reset = true;
 
         private void Awake()
         {
-            moveAction = InputSystem.actions.FindAction("Move");
-            lookAction = InputSystem.actions.FindAction("Look");
+            InputActionMap playerInputActions = _actions.FindActionMap("Player");
 
-            jumpAction = InputSystem.actions.FindAction("Jump");
-            selectAction = InputSystem.actions.FindAction("Select");
-            interactAction = InputSystem.actions.FindAction("Interact");
+            // Bind actions
+            _moveAction = playerInputActions.FindAction("Move");
+            _lookAction = playerInputActions.FindAction("Look");
+
+            _jumpAction = playerInputActions.FindAction("Jump");
+            _selectAction = playerInputActions.FindAction("Select");
+            _interactAction = playerInputActions.FindAction("Interact");
+
+            _pauseAction = playerInputActions.FindAction("Pause");
         }
 
         public void BeforeUpdate()
@@ -37,16 +48,16 @@ namespace Slates.Networking.Input
             }
 
             // Only capture input when mouse is locked (i.e., not interacting w/ menus, clicked outside of game, etc)
-            if (Cursor.lockState != CursorLockMode.Locked) return;
+            if (Cursor.lockState == CursorLockMode.None) return;
 
             NetworkButtons buttons = new NetworkButtons();
 
-            _input.direction += moveAction.ReadValue<Vector2>();
-            _input.look += lookAction.ReadValue<Vector2>();
+            _input.direction += _moveAction.ReadValue<Vector2>();
+            _input.look += _lookAction.ReadValue<Vector2>();
 
-            buttons.Set((int)InputButtons.Jump, jumpAction.IsPressed());
-            buttons.Set((int)InputButtons.Select, selectAction.IsPressed());
-            buttons.Set((int)InputButtons.Interact, interactAction.IsPressed());
+            buttons.Set((int)InputButtons.Jump, _jumpAction.IsPressed());
+            buttons.Set((int)InputButtons.Select, _selectAction.IsPressed());
+            buttons.Set((int)InputButtons.Interact, _interactAction.IsPressed());
 
             _input.buttons = new NetworkButtons(_input.buttons.Bits | buttons.Bits);
         }
@@ -56,7 +67,26 @@ namespace Slates.Networking.Input
             _input.direction.Normalize();
             _reset = true;
 
+            if (!TrackInput) return;
+
             input.Set(_input);
+
+            // Prevents camera sway & abrupt sensitivity changes
+            _input.look = Vector2.zero;
+        }
+
+        public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
+        {
+            if (runner.LocalPlayer != player) return;
+
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+        {
+            // Show the cursor after disconnection from server
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
 
         public void OnConnectedToServer(NetworkRunner runner) { }
@@ -68,14 +98,12 @@ namespace Slates.Networking.Input
         public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
         public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
         public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
-        public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) { }
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
         public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
         public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
         public void OnSceneLoadDone(NetworkRunner runner) { }
         public void OnSceneLoadStart(NetworkRunner runner) { }
         public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
-        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
         public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
     }
 }

@@ -14,6 +14,12 @@ It is designed for broad audiences including teens (13+) and adults who want a s
 ## Setup Instructions
 
 ## Manual & Gameplay Instructions
+### High Level Description
+The gameplay focuses on team-building through asymmetric puzzle design, which requires the host (VR player/Giant) to communicate and assist the clients (non-VR players).
+The asymmetric design primarily occurs through a knowledge difference between the host & client, with the host having access to various tomes of knowledge, and using these tomes to decipher, and understand the puzzles and challenges faced by the clients. Some puzzles will also make use of the host’s unique perspective in the world (i.e., that of a bird’s eye view of the puzzle). Other puzzles will require the host to shrink to a miniscule size to view & interact with items/elements hidden from view of the clients (e.g., shrinking down to coax a mouse from its den for the clients/kbm to catch).
+
+The clients interact with the world through complex movement systems, and physics interactions. In particular, the clients will have to solve platforming puzzles, move physics objects to complete puzzles, etc. However, they will not have access to all information, and will need to communicate with the host to solve riddles, decipher clues, or view the world from a perspective they otherwise wouldn’t be able to view.
+
 ### VR/Giant Player
 You can play the game as the giant by hosting a new game from the main menu. If the player is in VR, this will automatically be detected (WIP).
 
